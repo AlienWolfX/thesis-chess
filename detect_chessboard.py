@@ -1,50 +1,76 @@
-"""
-This file is used to detect the chessboard from the input.
-"""
-
 import cv2 as cv
-from matplotlib import pyplot as plt
 import numpy as np
+from matplotlib import pyplot as plt
 
-def sobel(src_image, kernel_size):
-    grad_x = cv.Sobel(src_image, cv.CV_16S, 1, 0, ksize=kernel_size, scale=1, delta=0, borderType=cv.BORDER_DEFAULT)
-    grad_y = cv.Sobel(src_image, cv.CV_16S, 0, 1, ksize=kernel_size, scale=1, delta=0, borderType=cv.BORDER_DEFAULT)
-    abs_grad_x = cv.convertScaleAbs(grad_x)
-    abs_grad_y = cv.convertScaleAbs(grad_y)
+def select_points(event, x, y, flags, param):
+    image, selected_points = param
+    if event == cv.EVENT_LBUTTONDOWN:
+        selected_points.append((x, y))
+        cv.circle(image, (x, y), 5, (0, 255, 0), -1)
+        if len(selected_points) > 1:
+            cv.line(image, selected_points[-2], selected_points[-1], (0, 255, 0), 2)
+        if len(selected_points) == 4:
+            cv.line(image, selected_points[3], selected_points[0], (0, 255, 0), 2)
+        cv.imshow("Select Corners", image)
 
-    grad = cv.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
+def calibrate_chessboard(image):
+    selected_points = []
+    cv.imshow("Select Corners", image)
+    cv.setMouseCallback("Select Corners", select_points, (image, selected_points))
+    cv.waitKey(0)
+    cv.destroyWindow("Select Corners")
+    if len(selected_points) != 4:
+        raise ValueError("Exactly 4 points must be selected.")
+    return selected_points
 
-    return grad
+def flatten_chessboard(image, corners):
+    width, height = 400, 400
+    dst_points = np.array([[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]], dtype=np.float32)
+    src_points = np.array(corners, dtype=np.float32)
+    matrix = cv.getPerspectiveTransform(src_points, dst_points)
+    flattened_image = cv.warpPerspective(image, matrix, (width, height))
+    return flattened_image
 
-def process_image(src_image_path, blur_kernel_size=(3, 3), sobel_kernel_size=3, harris_block_size=2, harris_ksize=3, harris_k=0.04):
+def extract_tiles(flattened_image):
+    tiles = []
+    tile_size = flattened_image.shape[0] // 8
+    for row in range(8):
+        for col in range(8):
+            x_start = col * tile_size
+            y_start = row * tile_size
+            tile = flattened_image[y_start:y_start + tile_size, x_start:x_start + tile_size]
+            tiles.append(tile)
+    return tiles
+
+def process_image(src_image_path, canny_low_threshold=50, canny_high_threshold=150):
     src_image = cv.imread(src_image_path)
     if src_image is None:
         raise FileNotFoundError(f"Image not found at path: {src_image_path}")
-    
-    src_image = cv.cvtColor(src_image, cv.COLOR_BGR2RGB)
-    src_gray = cv.cvtColor(src_image, cv.COLOR_BGR2GRAY)
 
-    blur_image = cv.blur(src_gray, blur_kernel_size)
+    corners = calibrate_chessboard(src_image.copy())
+    flattened_image = flatten_chessboard(src_image, corners)
+    denoised_image = cv.fastNlMeansDenoisingColored(flattened_image, None, 10, 10, 10, 21)
+    tiles = extract_tiles(denoised_image)
 
-    sobel_image = sobel(blur_image, sobel_kernel_size)
+    plt.figure(figsize=(10, 10))
+    plt.imshow(cv.cvtColor(src_image, cv.COLOR_BGR2RGB))
+    plt.title('Original Image')
 
-    corners = cv.cornerHarris(sobel_image, harris_block_size, harris_ksize, harris_k)
-    corners = cv.dilate(corners, None)
-
-    dest_image = np.copy(src_image)
-    dest_image[corners > 0.01 * corners.max()] = [0, 0, 255]
-    
-    return dest_image 
+    plt.figure(figsize=(10, 10))
+    for i, tile in enumerate(tiles):
+        plt.subplot(8, 8, i + 1)
+        plt.imshow(cv.cvtColor(tile, cv.COLOR_BGR2RGB))
+        plt.axis('off')
+    plt.suptitle('Separated Tiles')
+    plt.show()
 
 def main():
-    src_image_path = "img/board1.jpg"
+    src_image_path = "img/chess.jpg"
     try:
-        dest_image = process_image(src_image_path)
-        plt.imshow(dest_image)
-        plt.title("Detected Chessboard Corners")
-        plt.axis('off')
-        plt.show()
+        process_image(src_image_path)
     except FileNotFoundError as e:
+        print(e)
+    except ValueError as e:
         print(e)
 
 if __name__ == "__main__":
