@@ -91,7 +91,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "CheckMate"))
-        self.appName.setText(_translate("MainWindow", "CheckMate"))
+        self.appName.setText(_translate("MainWindow", "RookEye.ph"))
         self.newGame.setText(_translate("MainWindow", "New Game"))
         self.viewHistory.setText(_translate("MainWindow", "View History"))
         self.menuMenu.setTitle(_translate("MainWindow", "File"))

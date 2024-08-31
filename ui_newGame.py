@@ -16,11 +16,11 @@ class Ui_newGame(object):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("img/app.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         newGame.setWindowIcon(icon)
-        self.buttonBox = QtWidgets.QDialogButtonBox(parent=newGame)
-        self.buttonBox.setGeometry(QtCore.QRect(40, 580, 341, 32))
-        self.buttonBox.setOrientation(QtCore.Qt.Orientation.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.StandardButton.Cancel|QtWidgets.QDialogButtonBox.StandardButton.Ok)
-        self.buttonBox.setObjectName("buttonBox")
+        self.okButton = QtWidgets.QDialogButtonBox(parent=newGame)
+        self.okButton.setGeometry(QtCore.QRect(40, 580, 341, 32))
+        self.okButton.setOrientation(QtCore.Qt.Orientation.Horizontal)
+        self.okButton.setStandardButtons(QtWidgets.QDialogButtonBox.StandardButton.Cancel|QtWidgets.QDialogButtonBox.StandardButton.Ok)
+        self.okButton.setObjectName("okButton")
         self.label = QtWidgets.QLabel(parent=newGame)
         self.label.setGeometry(QtCore.QRect(40, 50, 49, 31))
         self.label.setObjectName("label")
@@ -39,10 +39,13 @@ class Ui_newGame(object):
         self.plainTextEdit_3 = QtWidgets.QPlainTextEdit(parent=newGame)
         self.plainTextEdit_3.setGeometry(QtCore.QRect(90, 130, 241, 31))
         self.plainTextEdit_3.setObjectName("plainTextEdit_3")
+        self.calibrateCameraButton = QtWidgets.QPushButton(parent=newGame)
+        self.calibrateCameraButton.setGeometry(QtCore.QRect(100, 200, 141, 24))
+        self.calibrateCameraButton.setObjectName("calibrateCameraButton")
 
         self.retranslateUi(newGame)
-        self.buttonBox.accepted.connect(newGame.accept) # type: ignore
-        self.buttonBox.rejected.connect(newGame.reject) # type: ignore
+        self.okButton.accepted.connect(newGame.accept) # type: ignore
+        self.okButton.rejected.connect(newGame.reject) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(newGame)
 
     def retranslateUi(self, newGame):
@@ -51,3 +54,4 @@ class Ui_newGame(object):
         self.label.setText(_translate("newGame", "Game:"))
         self.label_2.setText(_translate("newGame", "Player 1:"))
         self.label_3.setText(_translate("newGame", "Player 2:"))
+        self.calibrateCameraButton.setText(_translate("newGame", "Calibrate Camera"))
