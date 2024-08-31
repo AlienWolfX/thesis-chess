@@ -13,15 +13,23 @@ def select_points(event, x, y, flags, param):
             cv.line(image, selected_points[3], selected_points[0], (0, 255, 0), 2)
         cv.imshow("Select Corners", image)
 
-def calibrate_chessboard(image):
+def calibrate_chessboard(image, display_width=800, display_height=800):
+    resized_image = cv.resize(image, (display_width, display_height), interpolation=cv.INTER_AREA)
+    
     selected_points = []
-    cv.imshow("Select Corners", image)
-    cv.setMouseCallback("Select Corners", select_points, (image, selected_points))
+    cv.imshow("Select Corners", resized_image)
+    cv.setMouseCallback("Select Corners", select_points, (resized_image, selected_points))
     cv.waitKey(0)
     cv.destroyWindow("Select Corners")
     if len(selected_points) != 4:
         raise ValueError("Exactly 4 points must be selected.")
-    return selected_points
+    
+    # Scale points back to original image size
+    scale_x = image.shape[1] / display_width
+    scale_y = image.shape[0] / display_height
+    original_points = [(int(x * scale_x), int(y * scale_y)) for x, y in selected_points]
+    
+    return original_points
 
 def flatten_chessboard(image, corners):
     width, height = 400, 400
@@ -46,7 +54,7 @@ def process_image(src_image_path):
     src_image = cv.imread(src_image_path)
     if src_image is None:
         raise FileNotFoundError(f"Image not found at path: {src_image_path}")
-
+    
     corners = calibrate_chessboard(src_image.copy())
     flattened_image = flatten_chessboard(src_image, corners)
     denoised_image = cv.fastNlMeansDenoisingColored(flattened_image, None, 10, 10, 10, 21)
@@ -61,10 +69,11 @@ def process_image(src_image_path):
         plt.subplot(8, 8, i + 1)
         plt.imshow(cv.cvtColor(tile, cv.COLOR_BGR2RGB))
         plt.axis('off')
-    plt.suptitle('Separated Tiles')
+    plt.suptitle('Individual Tiles')
     plt.show()
 
 def main():
+    # src_image_path = "img/2.jpeg"
     src_image_path = "img/chess3.jpg"
     try:
         process_image(src_image_path)
