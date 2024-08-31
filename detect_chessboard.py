@@ -42,7 +42,7 @@ def extract_tiles(flattened_image):
             tiles.append(tile)
     return tiles
 
-def process_image(src_image_path, canny_low_threshold=50, canny_high_threshold=150):
+def process_image(src_image_path):
     src_image = cv.imread(src_image_path)
     if src_image is None:
         raise FileNotFoundError(f"Image not found at path: {src_image_path}")
@@ -65,7 +65,7 @@ def process_image(src_image_path, canny_low_threshold=50, canny_high_threshold=1
     plt.show()
 
 def main():
-    src_image_path = "img/chess.jpg"
+    src_image_path = "img/chess3.jpg"
     try:
         process_image(src_image_path)
     except FileNotFoundError as e:
