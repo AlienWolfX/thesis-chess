@@ -17,7 +17,7 @@
    <iconset>
     <normaloff>img/app.ico</normaloff>img/app.ico</iconset>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
+  <widget class="QDialogButtonBox" name="okButton">
    <property name="geometry">
     <rect>
      <x>40</x>
@@ -102,11 +102,24 @@
     </rect>
    </property>
   </widget>
+  <widget class="QPushButton" name="calibrateCameraButton">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>200</y>
+     <width>141</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Calibrate Camera</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>okButton</sender>
    <signal>accepted()</signal>
    <receiver>newGame</receiver>
    <slot>accept()</slot>
@@ -122,7 +135,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>okButton</sender>
    <signal>rejected()</signal>
    <receiver>newGame</receiver>
    <slot>reject()</slot>

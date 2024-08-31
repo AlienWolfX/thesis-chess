@@ -29,7 +29,7 @@
        </font>
       </property>
       <property name="text">
-       <string>CheckMate</string>
+       <string>RookEye.ph</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
