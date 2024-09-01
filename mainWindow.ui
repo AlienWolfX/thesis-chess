@@ -102,9 +102,7 @@
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionReport_Issue"/>
-    <addaction name="separator"/>
-    <addaction name="actionAbout_Us"/>
+    <addaction name="actionAbout"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuOptions"/>
@@ -116,7 +114,7 @@
     <string>Report Issue</string>
    </property>
   </action>
-  <action name="actionAbout_Us">
+  <action name="actionAbout">
    <property name="text">
     <string>About</string>
    </property>
