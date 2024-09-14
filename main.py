@@ -8,7 +8,7 @@ from PyQt6.QtGui import QPixmap, QImage, QPainter
 from PyQt6.QtCore import pyqtSignal, QThread, Qt
 from ui_mainWindow import Ui_MainWindow
 from ui_newGame import Ui_newGame
-from ui_viewHistory import Ui_viewHistory
+from ui_viewHistory import Ui_viewHistoryx
 from ui_about import Ui_about
 from ui_calibration import Ui_calibrateCamera
 import cv2 as cv
@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.ui.newGame.clicked.connect(self.newGame)
         self.ui.viewHistory.clicked.connect(self.viewHistory)
-        self.ui.menuAbout.triggered.connect(self.menuAbout)
+        self.ui.menuHelp.triggered.connect(self.menuHelp)
 
     def newGame(self):
         self.newGameDialog = NewGame(self)
@@ -34,7 +34,7 @@ class MainWindow(QMainWindow):
         self.viewHistoryWindow = ViewHistory(self)
         self.viewHistoryWindow.show()
         
-    def menuAbout(self):
+    def menuHelp(self):
         self.aboutDialog = About(self)
         self.aboutDialog.exec()
 
@@ -108,10 +108,10 @@ class CameraWorker(QThread):
         self.quit()
         self.wait()
 
-class ViewHistory(QMainWindow):
+class ViewHistory(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.ui = Ui_viewHistory()
+        self.ui = Ui_viewHistoryx()
         self.ui.setupUi(self)
         self.chessboard = chess.Board()
         
@@ -119,19 +119,10 @@ class ViewHistory(QMainWindow):
         self.ui.matchList.itemClicked.connect(self.displayMatch)
         self.ui.movesList.itemClicked.connect(self.displayMove)
         self.ui.movesList.currentRowChanged.connect(self.displayMove)
-        self.ui.returnButton.clicked.connect(self.returnMainWindow)
-        self.ui.actionAbout.triggered.connect(self.menuAbout)
         
         # Run Methods
         self.displayMatches()
         self.renderChessboard()
-
-    def menuAbout(self):
-        self.aboutDialog = About(self)
-        self.aboutDialog.exec()
-        
-    def returnMainWindow(self):
-        self.close()
         
     # Display csv files on matches folder
     def displayMatches(self):
@@ -208,7 +199,6 @@ class ViewHistory(QMainWindow):
         pixmap = QPixmap.fromImage(image)
         scaled_pixmap = pixmap.scaled(labelWidth, labelHeight, aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio, transformMode=Qt.TransformationMode.SmoothTransformation)
         self.ui.chessOutput.setPixmap(scaled_pixmap)
-
 class About(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
