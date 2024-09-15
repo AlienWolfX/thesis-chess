@@ -4,15 +4,15 @@ import subprocess
 def checkRemote():
     result = subprocess.run(["git", "diff", "--name-only", "origin/main"], capture_output=True, text=True)
     modified_files = result.stdout.splitlines()
-    remoteFile = [f for f in modified_files if f.endswith('.ui')]
+    remoteFile = [f for f in modified_files if f.startswith('ui/') and f.endswith('.ui')]
     return remoteFile
 
 def checkLocal():
-    local_files = [f for f in os.listdir() if f.endswith('.ui')]
+    local_files = [os.path.join('ui', f) for f in os.listdir('ui') if f.endswith('.ui')]
     return local_files
 
 def newFile(localFile):
-    repo = subprocess.run(["git", "ls-files", "*.ui"], capture_output=True, text=True)
+    repo = subprocess.run(["git", "ls-files", "ui/*.ui"], capture_output=True, text=True)
     repo_files = repo.stdout.splitlines()
     new = [f for f in localFile if f not in repo_files]
     return new
@@ -47,7 +47,7 @@ def main():
         return
     
     for ui_file in combinedUi:
-        py_file = f"ui_{os.path.splitext(ui_file)[0]}.py"
+        py_file = f"ui_{os.path.splitext(os.path.basename(ui_file))[0]}.py"
         
         if not os.path.exists(py_file) or getTime(ui_file) > getTime(py_file):
             print(f"Updating {py_file} from {ui_file}")

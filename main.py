@@ -6,11 +6,11 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QDialog, QFileDialog, QLi
 from PyQt6.QtSvg import QSvgRenderer
 from PyQt6.QtGui import QPixmap, QImage, QPainter
 from PyQt6.QtCore import pyqtSignal, QThread, Qt
-from ui_mainWindow import Ui_MainWindow
-from ui_newGame import Ui_newGame
-from ui_viewHistory import Ui_viewHistoryx
-from ui_about import Ui_about
-from ui_calibration import Ui_calibrateCamera
+from ui.ui_mainWindow import Ui_MainWindow
+from ui.ui_newGame import Ui_newGame
+from ui.ui_viewHistory import Ui_viewHistoryx
+from ui.ui_about import Ui_about
+from ui.ui_calibration import Ui_calibrateCamera
 import cv2 as cv
 import chess
 import chess.svg
