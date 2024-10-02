@@ -1,4 +1,17 @@
+# Development Folders
+
 env/*
 .venv/*
 __pycache__/*
 .idea/*
+.vscode/*
+codeql-custom-queries-python/*
+.github/*
+
+
+# Development files that should not be in the repo
+.env
+fen_to_chess.py
+fen.png
+prediction.jpg
+*.pyc
