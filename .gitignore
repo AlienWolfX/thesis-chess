@@ -7,11 +7,22 @@ __pycache__/*
 .vscode/*
 codeql-custom-queries-python/*
 .github/*
+test/*
 
 
 # Development files that should not be in the repo
 .env
-fen_to_chess.py
 fen.png
 prediction.jpg
+current_board.png
+current_board.svg
+frame.jpeg
 *.pyc
+squares.jpg
+warped.jpg
+*.copy
+
+# Testing files (To be removed if ma finalize na ang corner detection)
+yolov8.py
+implementation.py
+utils/*

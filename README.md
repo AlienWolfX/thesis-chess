@@ -55,19 +55,11 @@ A thesis exploring the application of computer vision in chess, where a camera c
 
 </div>
 
+<!-- Progress -->
 
-<!-- ROADMAP -->
+## Progress
 
-## Roadmap
-
-- [x] Chess Piece Recognition
-    - Model to be refined further
 - [x] FEN to Digital Chessboard
-- [x] Import and Export to CSV
-    - Export is TODO
-- [ ] Corner Detection
-    - [x] Manual Corner Detection
-    - [ ] Automatic Corner Detection
 
 <!-- LICENSE -->
 
