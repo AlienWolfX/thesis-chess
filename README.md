@@ -50,7 +50,7 @@ A thesis exploring the application of computer vision in chess, where a camera c
 <div align="center">
 
 [![Python][Python]][Python-url] [![OpenCV][OpenCV]][OpenCV-url] [![Qt][Qt]][Qt-url]
-[![VSCode][VSCode]][VSCode-url] [![TensorFlow][TensorFlow]][TensorFlow-url] [![Pandas][Pandas]][Pandas-url]
+[![TensorFlow][TensorFlow]][TensorFlow-url] [![Pandas][Pandas]][Pandas-url]
 [![NumPy][NumPy]][NumPy-url]
 
 </div>
@@ -95,8 +95,6 @@ Project Link: [https://github.com/alienwolfx/thesis-chess](https://github.com/al
 [OpenCV-url]: https://opencv.org/
 [Qt]: https://img.shields.io/badge/Qt-41CD52?style=for-the-badge&logo=qt&logoColor=white
 [Qt-url]: https://www.qt.io/
-[VSCode]: https://img.shields.io/badge/VSCode-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white
-[VSCode-url]: https://code.visualstudio.com/
 [TensorFlow]: https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white
 [TensorFlow-url]: https://www.tensorflow.org/
 [Pandas]: https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white
