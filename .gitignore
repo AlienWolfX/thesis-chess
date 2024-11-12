@@ -1,6 +1,4 @@
 # Development Folders
-
-env/*
 .venv/*
 __pycache__/*
 .idea/*
