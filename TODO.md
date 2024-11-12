@@ -1,5 +1,10 @@
 # TODO
 
+Function to be implemented in the code in the next commit
+
+* Hough Transform
+
+
 Chessboard
 
 - [ ] Board Detection

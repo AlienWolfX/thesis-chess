@@ -21,8 +21,9 @@ frame.jpeg
 squares.jpg
 warped.jpg
 *.copy
+edges.jpeg
+gray.jpeg
 
 # Testing files (To be removed if ma finalize na ang corner detection)
 yolov8.py
-implementation.py
 utils/*
