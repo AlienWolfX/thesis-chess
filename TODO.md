@@ -1,10 +1,5 @@
 # TODO
 
-Function to be implemented in the code in the next commit
-
-* Hough Transform
-
-
 Chessboard
 
 - [ ] Board Detection
@@ -21,3 +16,7 @@ CSV
 
 - [X] Read from CSV
 - [X] Import CSV
+
+Display
+
+- [x] FEN to Digital Chessboard

@@ -55,23 +55,21 @@ A thesis exploring the application of computer vision in chess, where a camera c
 
 </div>
 
-<!-- Progress -->
-
 ## Progress
 
-- [x] FEN to Digital Chessboard
+### Chess board detection
 
-<!-- LICENSE -->
+| Gray Blur                 | Canny Edge                  |
+|---------------------------|-----------------------------|
+| ![Gray](images/gray.jpeg) | ![Canny](images/edges.jpeg) |
 
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
-<!-- CONTACT -->
-
 ## Contact
 
-Allen Cruiz - [@cruizallen](https://instagram.com/cruizallen) - allengabrielle.cruiz@carsu.edu.ph
+Allen Cruiz - [@cruizallen](https://instagram.com/cruizallen) - <allengabrielle.cruiz@carsu.edu.ph>
 
 Project Link: [https://github.com/alienwolfx/thesis-chess](https://github.com/alienwolfx/thesis-chess)
 
@@ -88,7 +86,6 @@ Project Link: [https://github.com/alienwolfx/thesis-chess](https://github.com/al
 [issues-url]: https://github.com/alienwolfx/thesis-chess/issues
 [license-shield]: https://img.shields.io/github/license/alienwolfx/thesis-chess.svg?style=for-the-badge
 [license-url]: https://github.com/alienwolfx/thesis-chess/blob/master/LICENSE.txt
-<!-- [product-screenshot]: img/screenshot.png -->
 [Python]: https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white
 [Python-url]: https://www.python.org/
 [OpenCV]: https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white
