@@ -13,6 +13,7 @@ from PIL import Image
 import re
 import glob
 import PIL
+import os
 
 
 # Read image and do lite image processing
@@ -101,7 +102,7 @@ def augment_points(points):
 
 
 # Crop board into separate images and write to folder
-def write_crop_images(img, points, img_count=0, folder_path="./Data/raw_data/"):
+def write_crop_images(img, points, img_count=0, folder_path="RawData/"):
     num_list = []
     shape = list(np.shape(points))
     start_point = shape[0] - 14
