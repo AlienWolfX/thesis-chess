@@ -61,7 +61,7 @@ A thesis exploring the application of computer vision in chess, where a camera c
 
 | Gray Blur                 | Canny Edge                  |
 |---------------------------|-----------------------------|
-| ![Gray](images/gray.jpeg) | ![Canny](images/edges.jpeg) |
+| ![Gray](images/grayscale.jpeg) | ![Canny](images/canny.jpeg) |
 
 ## License
 
