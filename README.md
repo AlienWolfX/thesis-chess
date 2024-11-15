@@ -55,12 +55,29 @@ A thesis exploring the application of computer vision in chess, where a camera c
 
 </div>
 
+## Installation
+
+```bash
+# Creating virtual environment (venv)
+python -m venv .env
+
+# Activating venv
+.env/Scripts/activate
+
+# Installing dependencies
+pip install -r requirements.txt
+
+# Run
+python implementation.py
+
+```
+
 ## Progress
 
 ### Chess board detection
 
-| Gray Blur                 | Canny Edge                  |
-|---------------------------|-----------------------------|
+| Gray Blur                      | Canny Edge                  |
+|--------------------------------|-----------------------------|
 | ![Gray](images/grayscale.jpeg) | ![Canny](images/canny.jpeg) |
 
 ## License
