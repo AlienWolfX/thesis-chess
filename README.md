@@ -74,6 +74,10 @@ python implementation.py
 
 ## Progress
 
+### Camera
+
+A high-quality camera should be used. Testing with a **USB PC Camera** (Lenovo EasyCamera) with 0.3 MP quality resulted in horrible outcomes.
+
 ### Chess board detection
 
 | Gray Blur                      | Canny Edge                  |
