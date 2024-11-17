@@ -55,7 +55,9 @@ while True:
         
         edges = canny_edge(gray_blur)
         cv2.imwrite("edges.jpeg", edges)
-        
+
+        # Hough line appears to be broken
+        # Ayosonon pani
         lines = hough_line(edges)
         cv2.imwrite("lines.jpeg", lines)
                 
