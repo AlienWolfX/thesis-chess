@@ -1,72 +1,58 @@
-import re
 import cv2
-from utils.chessFunctions import (
-    fen_to_image,
-    read_img,
-    canny_edge,
-    atoi,
-    hough_line
-)
+import torch
+from ultralytics import YOLO
 
-def rescale_frame(frame, percent=75):
-    """
-    Rescale the given frame to the specified width and height.
-    """
-    dim = (1000, 750)
-    return cv2.resize(frame, dim, interpolation=cv2.INTER_AREA)
+from utils.chessFunctions import fen_to_image
 
-def natural_keys(text):
-    """
-    Sort strings containing numbers in a natural order.
-    """
-    return [atoi(c) for c in re.split(r'(\d+)', text)]
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-# IP CAM
-cap = cv2.VideoCapture('http://192.168.6.206:8080/video')
+model = YOLO('model/best.pt').to(device)
 
-# Select the live video stream source (0-webcam & 1-external camera)
-# cap = cv2.VideoCapture(0)
-if not cap.isOpened():
-    raise Exception("Could not open video device")
+# Initialize the webcam or IP camera
+# cameraSrc = "https://192.168.6.207:8080/video" # IP Camera URL
+cameraSrc = 0  # Laptop Webcam
 
+cap = cv2.VideoCapture(cameraSrc)
+
+frame_skip = 2 
+frame_count = 0
+
+# Display the starting board
 start = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
 board = fen_to_image(start)
 board_image = cv2.imread('current_board.png')
-if board_image is None:
-    raise Exception("Could not read current_board.png")
-cv2.imshow('current board', board_image)
 
 while True:
     ret, frame = cap.read()
     if not ret:
-        print("Failed to grab frame")
         break
 
-    small_frame = rescale_frame(frame)
-    cv2.imshow('live', small_frame)
+    frame_count += 1
+    if frame_count % frame_skip != 0:
+        continue
 
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord(' '):
-        print('Detecting...')
-        cv2.imwrite('frame.jpeg', frame)
-        
-        img, gray_blur = read_img('frame.jpeg')
-        cv2.imwrite("gray.jpeg", gray_blur)
-        
-        edges = canny_edge(gray_blur)
-        cv2.imwrite("edges.jpeg", edges)
-        
-        lines = hough_line(edges)
-        cv2.imwrite("lines.jpeg", lines)
-                
-        print(board)
-        board_image = cv2.imread('current_board.png')
-        if board_image is None:
-            raise Exception("Could not read current_board.png")
-        cv2.imshow('current board', board_image)
-        print('Completed!')
+    resized_frame = cv2.resize(frame, (320, 240))  
+    
+    results = model(resized_frame)
+    print(results)
 
-    elif key == ord('q'):
+    annotated_frame = results[0].plot(line_width=1) 
+
+    for result in results:
+        for box in result.boxes:
+            x1, y1, x2, y2 = box.xyxy[0].tolist()
+            x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
+            center_bottom_x = (x1 + x2) // 2
+            center_bottom_y = y2
+            cv2.circle(annotated_frame, (center_bottom_x, center_bottom_y), 3, (255, 255, 255), -1)
+
+    # print(board) # Current board still not implemented
+    board_image = cv2.imread('current_board.png')
+    cv2.imshow('current board', board_image)
+    
+    cv2.imshow('Live Inference', annotated_frame)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
 cap.release()

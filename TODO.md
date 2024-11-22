@@ -2,10 +2,8 @@
 
 Chessboard
 
-- [ ] Board Detection
-    - [ ] Corner Detection
-    - [ ] Seperation into 64 individual squares
-    - [ ] FEN Mapping
+- [ ] Board Mapping
+    - [ ] Assigning of Chess pieces with the mapping
 
 Chess Piece
 

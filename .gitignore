@@ -6,6 +6,8 @@ __pycache__/*
 codeql-custom-queries-python/*
 .github/*
 test/*
+docs/*
+dataset/*
 
 
 # Development files that should not be in the repo
@@ -22,3 +24,4 @@ warped.jpg
 edges.jpeg
 gray.jpeg
 lines.jpeg
+capturePics.py
