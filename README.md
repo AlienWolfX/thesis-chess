@@ -50,7 +50,7 @@ A thesis exploring the application of computer vision in chess, where a camera c
 <div align="center">
 
 [![Python][Python]][Python-url] [![OpenCV][OpenCV]][OpenCV-url] [![Qt][Qt]][Qt-url]
-[![TensorFlow][TensorFlow]][TensorFlow-url] [![Pandas][Pandas]][Pandas-url]
+[![TensorFlow][TensorFlow]][TensorFlow-url] [![PyTorch][PyTorch]][PyTorch-url] [![Pandas][Pandas]][Pandas-url]
 [![NumPy][NumPy]][NumPy-url]
 
 </div>
@@ -78,12 +78,6 @@ python implementation.py
 
 A high-quality camera should be used. Testing with a **USB PC Camera** (Lenovo EasyCamera) with 0.3 MP quality resulted in horrible outcomes.
 
-### Chess board detection
-
-| Gray Blur                      | Canny Edge                  |
-|--------------------------------|-----------------------------|
-| ![Gray](images/grayscale.jpeg) | ![Canny](images/canny.jpeg) |
-
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
@@ -107,15 +101,17 @@ Project Link: [https://github.com/alienwolfx/thesis-chess](https://github.com/al
 [issues-url]: https://github.com/alienwolfx/thesis-chess/issues
 [license-shield]: https://img.shields.io/github/license/alienwolfx/thesis-chess.svg?style=for-the-badge
 [license-url]: https://github.com/alienwolfx/thesis-chess/blob/master/LICENSE.txt
-[Python]: https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white
+[Python]: https://img.shields.io/badge/python-3776AB?style=for-the-badge
 [Python-url]: https://www.python.org/
-[OpenCV]: https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white
+[OpenCV]: https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge
 [OpenCV-url]: https://opencv.org/
-[Qt]: https://img.shields.io/badge/Qt-41CD52?style=for-the-badge&logo=qt&logoColor=white
+[Qt]: https://img.shields.io/badge/Qt-41CD52?style=for-the-badge
 [Qt-url]: https://www.qt.io/
-[TensorFlow]: https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white
+[TensorFlow]: https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge
 [TensorFlow-url]: https://www.tensorflow.org/
-[Pandas]: https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white
+[PyTorch]: https://img.shields.io/badge/PyTorch-FF0000?style=for-the-badge
+[PyTorch-url]: https://pytorch.org/
+[Pandas]: https://img.shields.io/badge/Pandas-150458?style=for-the-badge
 [Pandas-url]: https://pandas.pydata.org/
-[NumPy]: https://img.shields.io/badge/NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white
+[NumPy]: https://img.shields.io/badge/NumPy-013243?style=for-the-badge
 [NumPy-url]: https://numpy.org/
