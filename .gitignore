@@ -8,6 +8,7 @@ codeql-custom-queries-python/*
 test/*
 docs/*
 dataset/*
+old_scripts/*
 
 
 # Development files that should not be in the repo
@@ -25,3 +26,4 @@ edges.jpeg
 gray.jpeg
 lines.jpeg
 capturePics.py
+test.py
