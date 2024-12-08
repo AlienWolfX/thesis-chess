@@ -72,11 +72,53 @@ python implementation.py
 
 ```
 
-## Progress
+## Milestones
+
+### Board Detection & Calibration
+- [x] Detect 4 corner rooks
+- [x] Calculate grid mapping
+- [x] Draw chessboard overlay
+- [x] Validate square positions
+Status: Completed (December 2024)
+
+### Piece Detection
+- [] Train a Higher YOLO model
+- [x] Train a YOLO model
+- [x] Detect chess pieces
+- [x] Map pieces to squares
+- [ ] Handle piece occlusion
+Status: In Progress
+
+### Move Detection
+- [x] Track piece positions
+- [x] Detect piece movements
+- [ ] Validate legal moves
+- [ ] Generate move notation
+Status: In Progress
+
+### Game State Management
+- [ ] Initialize game state
+- [ ] Track captured pieces
+- [ ] Detect checkmate/stalemate
+- [ ] Save game history
+Status: Not Started
+
+### User Interface
+- [x] Display grid overlay
+- [x] Show piece detection
+- [x] Add move indicators
+- [ ] Others
+Status: In Progress
+
+## Findings
 
 ### Camera
 
 A high-quality camera should be used. Testing with a **USB PC Camera** (Lenovo EasyCamera) with 0.3 MP quality resulted in horrible outcomes.
+
+### Model Weights
+
+***In progress***
 
 ## License
 
