@@ -82,7 +82,7 @@ python implementation.py
 Status: Completed (December 2024)
 
 ### Piece Detection
-- [] Train a Higher YOLO model
+- [ ] Train a Higher YOLO model
 - [x] Train a YOLO model
 - [x] Detect chess pieces
 - [x] Map pieces to squares
