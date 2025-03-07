@@ -2,9 +2,8 @@ import cv2
 import torch
 from ultralytics import YOLO
 import time
+from utils.chessFunctions import fen_to_image
 import numpy as np
-
-# from utils.chessFunctions import fen_to_image
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -12,7 +11,7 @@ model = YOLO('model/v10.pt').to(device)
 
 # Initialize the webcam or IP camera
 # cameraSrc = "https://192.168.6.207:8080/video" # IP Camera URL
-cameraSrc = 0  # Laptop Webcam
+cameraSrc = 1  # Laptop Webcam
 
 cap = cv2.VideoCapture(cameraSrc)
 
@@ -44,8 +43,8 @@ initial_board = {
 
 # Display the starting board
 start = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
-# board = fen_to_image(start)
-board_image = cv2.imread('current_board.png')
+board = fen_to_image(start)
+# board_image = cv2.imread('current_board.png')
 
 square_coords = {}
 
@@ -260,7 +259,6 @@ while True:
     if calibrated:
         current_positions = track_pieces(results)
         
-        # Draw piece detections and movements
         for result in results:
             for box in result.boxes:
                 x1, y1, x2, y2 = box.xyxy[0].tolist()
