@@ -234,6 +234,20 @@ def detect_moves(previous_positions, current_positions):
     
     return moves
 
+# Once calibrated, only process the region containing the chessboard
+def get_roi_from_calibration():
+    if all(k in square_coords for k in ['a1', 'h1', 'a8', 'h8']):
+        min_x = min(square_coords['a1'][0], square_coords['a8'][0])
+        max_x = max(square_coords['h1'][0], square_coords['h8'][0])
+        min_y = min(square_coords['a8'][1], square_coords['h8'][1])
+        max_y = max(square_coords['a1'][1], square_coords['h1'][1])
+        
+        # Add padding
+        padding = 20
+        return (max(0, min_x-padding), max(0, min_y-padding), 
+                min(frame.shape[1], max_x+padding), min(frame.shape[0], max_y+padding))
+    return None
+
 previous_positions = {}
 
 # Main loop
@@ -257,6 +271,13 @@ while True:
     draw_grid(annotated_frame, square_coords)
     
     if calibrated:
+        roi = get_roi_from_calibration()
+        if roi:
+            x1, y1, x2, y2 = roi
+            roi_frame = resized_frame[y1:y2, x1:x2]
+            results = model(roi_frame)
+            # Adjust coordinates for ROI
+        
         current_positions = track_pieces(results)
         
         for result in results:
