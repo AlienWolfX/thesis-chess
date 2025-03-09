@@ -250,6 +250,34 @@ def get_roi_from_calibration():
 
 previous_positions = {}
 
+# Pre-compute square coordinates after calibration
+# Store distances in a lookup table to avoid repeated calculations
+square_distance_cache = {}
+
+def track_pieces_optimized(results):
+    current_positions = {}
+    for result in results:
+        for box in result.boxes:
+            # Only compute what we need
+            x1, y1, x2, y2 = box.xyxy[0].tolist()
+            center_x = int((x1 + x2) / 2) 
+            center_y = int(y2)
+            piece_label = model.names[int(box.cls)]
+            
+            # Use position key for cache lookup
+            pos_key = (center_x, center_y)
+            if pos_key in square_distance_cache:
+                closest_square = square_distance_cache[pos_key]
+            else:
+                # Kulang pag function
+                closest_square = find_closest_square(center_x, center_y)
+                square_distance_cache[pos_key] = closest_square
+            
+            if closest_square:
+                current_positions[closest_square] = class_id_mapping[piece_label]
+    
+    return current_positions
+
 # Main loop
 calibrated = False
 while True:
