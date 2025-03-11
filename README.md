@@ -57,6 +57,9 @@ A thesis exploring the application of computer vision in chess, where a camera c
 
 ## Installation
 
+> [!NOTE]
+> Python 3.10 is required
+
 ```bash
 # Creating virtual environment (venv)
 python -m venv .env
