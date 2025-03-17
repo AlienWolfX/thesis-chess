@@ -7,7 +7,7 @@ import numpy as np
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-model = YOLO('model/v10.pt').to(device)
+model = YOLO('model/v20.pt').to(device)
 
 # Initialize the webcam or IP camera
 # cameraSrc = "https://192.168.6.207:8080/video" # IP Camera URL
@@ -57,13 +57,15 @@ def calibrate_board(results):
             x1, y1, x2, y2 = box.xyxy[0].tolist()
             x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
             center_x = (x1 + x2) // 2
-            center_y = y2
+            center_y = y2  # Always use bottom of bounding box
             piece_label = model.names[int(box.cls)]
             
+            piece_data = (center_x, center_y)
+            
             if piece_label == 'White-Rook':
-                piece_positions['white_rooks'].append((center_x, center_y))
+                piece_positions['white_rooks'].append(piece_data)
             elif piece_label == 'Black-Rook':
-                piece_positions['black_rooks'].append((center_x, center_y))
+                piece_positions['black_rooks'].append(piece_data)
     
     # Need all 4 rooks for calibration
     if len(piece_positions['white_rooks']) == 2 and len(piece_positions['black_rooks']) == 2:
@@ -71,20 +73,24 @@ def calibrate_board(results):
         white_rooks = sorted(piece_positions['white_rooks'], key=lambda x: x[0])
         black_rooks = sorted(piece_positions['black_rooks'], key=lambda x: x[0])
         
-        # From Bottom to Top (h1, a1, h8, a8)
-        a1 = white_rooks[1]
-        h1 = white_rooks[0]
-        a8 = black_rooks[0]
-        h8 = black_rooks[1]
+        # Assign corners based on position (bottom to top)
+        h1 = white_rooks[0]  # Bottom right
+        a1 = white_rooks[1]  # Bottom left
+        a8 = black_rooks[0]  # Top left
+        h8 = black_rooks[1]  # Top right
         
         square_coords['a1'] = a1
         square_coords['h1'] = h1
         square_coords['a8'] = a8
         square_coords['h8'] = h8
         
-        # Calculate rank positions first (horizontal lines)
+        # Calculate rank positions with adjusted interpolation
+        outer_spacing = 7.0  # Keep outer bounds
+        inner_spacing = 7.0  # Increase for tighter inner squares
+        
         for rank in range(1, 9):
-            rank_ratio = (rank - 1) / 7.0
+            # Use outer spacing for overall board dimensions
+            rank_ratio = (rank - 1) / outer_spacing
             
             # Get left and right points for this rank
             left_x = int(a1[0] + rank_ratio * (a8[0] - a1[0]))
@@ -92,9 +98,10 @@ def calibrate_board(results):
             right_x = int(h1[0] + rank_ratio * (h8[0] - h1[0]))
             right_y = int(h1[1] + rank_ratio * (h8[1] - h1[1]))
             
-            # Interpolate points along this rank
+            # Interpolate points along this rank with tighter inner spacing
             for file_idx, file in enumerate('abcdefgh'):
-                file_ratio = file_idx / 7.0
+                # Adjust file ratio for tighter inner squares
+                file_ratio = file_idx / inner_spacing
                 x = int(left_x + file_ratio * (right_x - left_x))
                 y = int(left_y + file_ratio * (right_y - left_y))
                 square_coords[f'{file}{rank}'] = (x, y)
@@ -234,49 +241,7 @@ def detect_moves(previous_positions, current_positions):
     
     return moves
 
-# Once calibrated, only process the region containing the chessboard
-def get_roi_from_calibration():
-    if all(k in square_coords for k in ['a1', 'h1', 'a8', 'h8']):
-        min_x = min(square_coords['a1'][0], square_coords['a8'][0])
-        max_x = max(square_coords['h1'][0], square_coords['h8'][0])
-        min_y = min(square_coords['a8'][1], square_coords['h8'][1])
-        max_y = max(square_coords['a1'][1], square_coords['h1'][1])
-        
-        # Add padding
-        padding = 20
-        return (max(0, min_x-padding), max(0, min_y-padding), 
-                min(frame.shape[1], max_x+padding), min(frame.shape[0], max_y+padding))
-    return None
-
 previous_positions = {}
-
-# Pre-compute square coordinates after calibration
-# Store distances in a lookup table to avoid repeated calculations
-square_distance_cache = {}
-
-def track_pieces_optimized(results):
-    current_positions = {}
-    for result in results:
-        for box in result.boxes:
-            # Only compute what we need
-            x1, y1, x2, y2 = box.xyxy[0].tolist()
-            center_x = int((x1 + x2) / 2) 
-            center_y = int(y2)
-            piece_label = model.names[int(box.cls)]
-            
-            # Use position key for cache lookup
-            pos_key = (center_x, center_y)
-            if pos_key in square_distance_cache:
-                closest_square = square_distance_cache[pos_key]
-            else:
-                # Kulang pag function
-                closest_square = find_closest_square(center_x, center_y)
-                square_distance_cache[pos_key] = closest_square
-            
-            if closest_square:
-                current_positions[closest_square] = class_id_mapping[piece_label]
-    
-    return current_positions
 
 # Main loop
 calibrated = False
@@ -299,13 +264,6 @@ while True:
     draw_grid(annotated_frame, square_coords)
     
     if calibrated:
-        roi = get_roi_from_calibration()
-        if roi:
-            x1, y1, x2, y2 = roi
-            roi_frame = resized_frame[y1:y2, x1:x2]
-            results = model(roi_frame)
-            # Adjust coordinates for ROI
-        
         current_positions = track_pieces(results)
         
         for result in results:
