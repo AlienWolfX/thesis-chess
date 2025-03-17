@@ -2,7 +2,7 @@ import cv2
 import torch
 from ultralytics import YOLO
 import time
-from utils.chessFunctions import fen_to_image
+from utils.chessFunctions import fen_to_image, create_board_display
 import numpy as np
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -265,6 +265,14 @@ while True:
     
     if calibrated:
         current_positions = track_pieces(results)
+        
+        # Create and show board visualization
+        board_vis = create_board_display(current_positions)
+        
+        # Position the board window
+        cv2.namedWindow('Chess Board', cv2.WINDOW_NORMAL)
+        cv2.moveWindow('Chess Board', 200, 200)
+        cv2.imshow('Chess Board', board_vis)
         
         for result in results:
             for box in result.boxes:
