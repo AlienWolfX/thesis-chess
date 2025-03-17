@@ -119,16 +119,18 @@ python implementation.py
 - [ ] Others
       Status: In Progress
 
-## Findings
+## Findings (As of March 17, 2025)
 
-### Camera
+>![NOTE]
+> Updated on: 02:12 PM
 
-A high-quality camera should be used. Testing with a **USB PC Camera** (Lenovo EasyCamera) with 0.3 MP quality resulted in horrible outcomes.
+> Roboflow Version: v20
 
-### Model Weights
+> Url: [Link to Roboflow](https://app.roboflow.com/rookeye/rookeye/20)
 
-**_In progress_**
-
+| Confusion Matrix | Results | Predictions |
+|:---:|:---:|:---:|
+| ![Confusion Matrix](findings/v20/confusion_matrix.png) | ![Results](findings/v20/results.png) | ![Predictions](findings/v20/val_batch0_pred.jpg) |
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
