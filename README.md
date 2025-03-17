@@ -77,31 +77,16 @@ python implementation.py
 
 ## Findings (As of March 17, 2025)
 
-> ![NOTE]
-> Updated on: 02:12 PM
+>[!NOTE]
+> Updated on: 02:22 PM
 
 > Roboflow Version: v20
 
 > Url: [Link to Roboflow](https://app.roboflow.com/rookeye/rookeye/20)
 
-|                    Confusion Matrix                    |               Results                |                   Predictions                    |
-| :----------------------------------------------------: | :----------------------------------: | :----------------------------------------------: |
+| Confusion Matrix | Results | Predictions |
+|:---:|:---:|:---:|
 | ![Confusion Matrix](findings/v20/confusion_matrix.png) | ![Results](findings/v20/results.png) | ![Predictions](findings/v20/val_batch0_pred.jpg) |
-
-### Data Augmentation Parameters
-
-| Parameter                    | Value                        |
-| :--------------------------- | :--------------------------- |
-| Outputs per training example | 7                            |
-| Flip                         | Horizontal                   |
-| Shear                        | ±4° Horizontal, ±6° Vertical |
-| Grayscale                    | Apply to 6% of images        |
-| Hue                          | Between -6° and +6°          |
-| Brightness                   | Between -12% and +12%        |
-| Exposure                     | Between -13% and +13°        |
-| Blur                         | Up to 1.8px                  |
-| Noise                        | Up to 0.66% of pixels        |
-
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
