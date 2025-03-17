@@ -78,10 +78,8 @@ python implementation.py
 ## Findings (As of March 17, 2025)
 
 >[!NOTE]
-> Updated on: 02:22 PM
-
+> Updated on: 02:23 PM
 > Roboflow Version: v20
-
 > Url: [Link to Roboflow](https://app.roboflow.com/rookeye/rookeye/20)
 
 | Confusion Matrix | Results | Predictions |
