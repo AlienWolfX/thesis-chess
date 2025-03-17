@@ -75,62 +75,19 @@ python implementation.py
 
 ```
 
-## Milestones
-
-### Board Detection & Calibration
-
-- [x] Detect 4 corner rooks
-- [x] Calculate grid mapping
-- [x] Draw chessboard overlay
-- [x] Validate square positions
-      Status: Completed (December 2024)
-
-### Piece Detection
-
-- [ ] Train a Higher YOLO model
-- [x] Train a YOLO model
-- [x] Detect chess pieces
-- [x] Map pieces to squares
-- [ ] Handle piece occlusion
-      Status: In Progress
-
-### Move Detection
-
-- [x] Track piece positions
-- [x] Detect piece movements
-- [ ] Generate move notation
-      Status: In Progress
-
-### Game State Management
-
-- [ ] Initialize game state
-- [ ] Track captured pieces
-- [ ] Detect checkmate/stalemate
-- [x] View game history
-  - [x] Export as CSV
-- [ ] Save game history
-      Status: Not Started
-
-### User Interface
-
-- [x] Display grid overlay
-- [x] Show piece detection
-- [x] Add move indicators
-- [ ] Others
-      Status: In Progress
-
 ## Findings (As of March 17, 2025)
 
->![NOTE]
+> ![NOTE]
 > Updated on: 02:12 PM
 
 > Roboflow Version: v20
 
 > Url: [Link to Roboflow](https://app.roboflow.com/rookeye/rookeye/20)
 
-| Confusion Matrix | Results | Predictions |
-|:---:|:---:|:---:|
+|                    Confusion Matrix                    |               Results                |                   Predictions                    |
+| :----------------------------------------------------: | :----------------------------------: | :----------------------------------------------: |
 | ![Confusion Matrix](findings/v20/confusion_matrix.png) | ![Results](findings/v20/results.png) | ![Predictions](findings/v20/val_batch0_pred.jpg) |
+
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
