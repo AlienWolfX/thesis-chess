@@ -88,6 +88,20 @@ python implementation.py
 | :----------------------------------------------------: | :----------------------------------: | :----------------------------------------------: |
 | ![Confusion Matrix](findings/v20/confusion_matrix.png) | ![Results](findings/v20/results.png) | ![Predictions](findings/v20/val_batch0_pred.jpg) |
 
+### Data Augmentation Parameters
+
+| Parameter                    | Value                        |
+| :--------------------------- | :--------------------------- |
+| Outputs per training example | 7                            |
+| Flip                         | Horizontal                   |
+| Shear                        | ±4° Horizontal, ±6° Vertical |
+| Grayscale                    | Apply to 6% of images        |
+| Hue                          | Between -6° and +6°          |
+| Brightness                   | Between -12% and +12%        |
+| Exposure                     | Between -13% and +13°        |
+| Blur                         | Up to 1.8px                  |
+| Noise                        | Up to 0.66% of pixels        |
+
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
