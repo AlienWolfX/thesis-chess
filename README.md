@@ -78,7 +78,7 @@ python implementation.py
 ## Findings (As of March 17, 2025)
 
 
-Updated on: 06:03 PM
+Updated on: 06:16 PM
 
 Roboflow Version: v20
 
@@ -86,7 +86,7 @@ Url: [Link to Roboflow](https://app.roboflow.com/rookeye/rookeye/20)
 
 Distance (from top mat to tripod): 30 inches
 
-Camera Level: 30°
+Camera Level: 30.0°
 
 | Confusion Matrix | Results | Predictions |
 |:---:|:---:|:---:|
