@@ -11,6 +11,7 @@ docs/*
 dataset/*
 old_scripts/*
 model/*
+training_ipynb/*
 
 
 # Development files that should not be in the repo
