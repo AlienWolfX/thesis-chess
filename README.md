@@ -75,22 +75,40 @@ python implementation.py
 
 ```
 
-## Findings (As of March 17, 2025)
+## Findings
 
+### YOLOv8s
 
-Updated on: 06:16 PM
+Updated on: 01:50 AM
+
+Roboflow Version: v21
+
+Url: [Link to Roboflow](https://app.roboflow.com/rookeye/rookeye/21)
+
+Distance (from top mat to tripod): N/A
+
+Camera Level: N/A
+
+|                        Confusion Matrix                        |                   Results                    |                       Predictions                        |
+| :------------------------------------------------------------: | :------------------------------------------: | :------------------------------------------------------: |
+| ![Confusion Matrix](findings/v21_yolov8s/confusion_matrix.png) | ![Results](findings/v21_yolov8s/results.png) | ![Predictions](findings/v21_yolov8s/val_batch0_pred.jpg) |
+
+### YOLOv8n
+
+Updated on: 01:50 AM
 
 Roboflow Version: v20
 
 Url: [Link to Roboflow](https://app.roboflow.com/rookeye/rookeye/20)
 
-Distance (from top mat to tripod): 30 inches
+Distance (from top mat to tripod): 30.0 inches
 
 Camera Level: 30.0°
 
-| Confusion Matrix | Results | Predictions |
-|:---:|:---:|:---:|
-| ![Confusion Matrix](findings/v20/confusion_matrix.png) | ![Results](findings/v20/results.png) | ![Predictions](findings/v20/val_batch0_pred.jpg) |
+|                        Confusion Matrix                        |                   Results                    |                       Predictions                        |
+| :------------------------------------------------------------: | :------------------------------------------: | :------------------------------------------------------: |
+| ![Confusion Matrix](findings/v20_yolov8n/confusion_matrix.png) | ![Results](findings/v20_yolov8n/results.png) | ![Predictions](findings/v20_yolov8n/val_batch0_pred.jpg) |
+
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
