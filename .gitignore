@@ -32,3 +32,4 @@ capturePics.py
 test.py
 *.pt
 findings.py
+yolov8.py
