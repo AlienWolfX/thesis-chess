@@ -2,14 +2,14 @@
 The main file for the project.
 """
 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QDialog, QFileDialog, QListWidgetItem
+from PyQt6.QtWidgets import QApplication, QMainWindow, QDialog, QFileDialog, QListWidgetItem, QMessageBox
 from PyQt6.QtSvg import QSvgRenderer
 from PyQt6.QtGui import QPixmap, QImage, QPainter
 from PyQt6.QtCore import Qt
-from forms.ui_mainWindow import Ui_MainWindow
-from forms.ui_newGame import Ui_newGame
-from forms.ui_viewHistory import Ui_viewHistoryx
-from forms.ui_about import Ui_about
+from forms.mainWindow import Ui_MainWindow
+from forms.newGame import Ui_newGame
+from forms.viewHistory import Ui_viewHistory
+from forms.about import Ui_about
 import cv2 as cv
 import chess
 import chess.svg
@@ -27,7 +27,13 @@ class MainWindow(QMainWindow):
 
     def newGame(self):
         self.newGameDialog = NewGame(self)
-        self.newGameDialog.exec()
+        if self.newGameDialog.exec() == QDialog.DialogCode.Accepted:
+            game_details = self.newGameDialog.getGameDetails()
+            if game_details:
+                print(f"Starting new game: {game_details['game_name']}")
+                print(f"White player: {game_details['white_player']}")
+                print(f"Black player: {game_details['black_player']}")
+                # Add your game initialization code here
         
     def viewHistory(self):
         self.viewHistoryWindow = ViewHistory(self)
@@ -42,12 +48,71 @@ class NewGame(QDialog):
         super().__init__(parent)
         self.ui = Ui_newGame()
         self.ui.setupUi(self)
-        self.ui.okButton.clicked.connect(self.close)
+        
+        # Initialize game details
+        self.game_details = {
+            'game_name': '',
+            'white_player': '',
+            'black_player': ''
+        }
+        
+        # Connect buttons and validation
+        self.ui.proceedButton.clicked.connect(self.validateAndSave)
+        self.ui.gameNameEdit.textChanged.connect(self.validateGameName)
+        self.ui.whitePlayerEdit.textChanged.connect(self.validatePlayerName)
+        self.ui.blackPlayerEdit.textChanged.connect(self.validatePlayerName)
+
+    def validateGameName(self):
+        """Validate game name to only allow numbers"""
+        game_name = self.ui.gameNameEdit.text()
+        if not game_name.isdigit() and game_name != '':
+            self.ui.gameNameEdit.setText(game_name[:-1])
+
+    def validatePlayerName(self):
+        """Validate player names to only allow letters and spaces"""
+        for edit in [self.ui.whitePlayerEdit, self.ui.blackPlayerEdit]:
+            player_name = edit.text()
+            if not all(c.isalpha() or c.isspace() for c in player_name) and player_name != '':
+                edit.setText(player_name[:-1])
+
+    def validateAndSave(self):
+        """Validate all fields before saving"""
+        game_name = self.ui.gameNameEdit.text()
+        white_player = self.ui.whitePlayerEdit.text()
+        black_player = self.ui.blackPlayerEdit.text()
+
+        # Check if fields are empty
+        if not all([game_name, white_player, black_player]):
+            QMessageBox.warning(self, "Validation Error", "All fields must be filled")
+            return
+
+        # Additional validation
+        if not game_name.isdigit():
+            QMessageBox.warning(self, "Validation Error", "Game name must contain only numbers")
+            return
+
+        if not all(c.isalpha() or c.isspace() for c in white_player + black_player):
+            QMessageBox.warning(self, "Validation Error", "Player names must contain only letters")
+            return
+
+        # If all validations pass, save and accept
+        self.saveGameDetails()
+
+    def saveGameDetails(self):
+        """Save game details before closing"""
+        self.game_details['game_name'] = self.ui.gameNameEdit.text()
+        self.game_details['white_player'] = self.ui.whitePlayerEdit.text()
+        self.game_details['black_player'] = self.ui.blackPlayerEdit.text()
+        self.accept()
+
+    def getGameDetails(self):
+        """Return the game details if dialog was accepted"""
+        return self.game_details if self.result() == QDialog.DialogCode.Accepted else None
 
 class ViewHistory(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.ui = Ui_viewHistoryx()
+        self.ui = Ui_viewHistory()
         self.ui.setupUi(self)
         self.chessboard = chess.Board()
         self.board_size = 600 
@@ -62,6 +127,12 @@ class ViewHistory(QDialog):
         # Add new button connections
         self.ui.resetButton.clicked.connect(self.resetView)
         self.ui.returnButton.clicked.connect(self.close)
+        
+        # Sa updating game information planning to change this based sa csv file
+        self.ui.gameNoLabel.setText("5")
+        self.ui.whitePlayerLabel.setText("Magnus Carlsen")
+        self.ui.blackPlayerLabel.setText("Hikaru Nakamura")
+        self.ui.labelDate.setText("Date: 2023-11-20")
         
         # Run Methods
         self.displayMatches()

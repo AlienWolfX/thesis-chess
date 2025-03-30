@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>viewHistoryx</class>
- <widget class="QDialog" name="viewHistoryx">
+ <class>viewHistory</class>
+ <widget class="QDialog" name="viewHistory">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -24,20 +24,29 @@
     <normaloff>img/app.ico</normaloff>img/app.ico</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" rowspan="4" colspan="1">
-    <widget class="QLabel" name="chessOutput">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>2</horstretch>
-       <verstretch>1</verstretch>
-      </sizepolicy>
+   <item row="1" column="1">
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Moves List</string>
      </property>
-     <property name="styleSheet">
-      <string notr="true">background-color: white; border: 1px solid gray;</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QListWidget" name="movesList">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>1</horstretch>
+          <verstretch>2</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>250</width>
+          <height>200</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item row="0" column="1">
@@ -83,32 +92,36 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="1">
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="title">
-      <string>Moves List</string>
+   <item row="0" column="0" rowspan="5">
+    <widget class="QLabel" name="chessOutput">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>2</horstretch>
+       <verstretch>1</verstretch>
+      </sizepolicy>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <widget class="QListWidget" name="movesList">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>1</horstretch>
-          <verstretch>2</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>250</width>
-          <height>200</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <property name="styleSheet">
+      <string notr="true">background-color: white; border: 1px solid gray;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
     </widget>
    </item>
-   <item row="2" column="1">
+   <item row="4" column="1" alignment="Qt::AlignRight">
+    <widget class="QPushButton" name="returnButton">
+     <property name="minimumSize">
+      <size>
+       <width>100</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Return</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -121,17 +134,83 @@
      </property>
     </spacer>
    </item>
-   <item row="3" column="1" alignment="Qt::AlignRight">
-    <widget class="QPushButton" name="returnButton">
-     <property name="text">
-      <string>Return</string>
+  <item row="2" column="1">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Game Information</string>
      </property>
-     <property name="minimumSize">
-      <size>
-       <width>100</width>
-       <height>30</height>
-      </size>
-     </property>
+     <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="labelGameNo">
+        <property name="text">
+         <string>Game Number:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="gameNoLabel">
+        <property name="text">
+         <string>1</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="labelWhite">
+        <property name="text">
+         <string>White Player:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="whitePlayerLabel">
+        <property name="text">
+         <string>Player 1</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="labelBlack">
+        <property name="text">
+         <string>Black Player:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLabel" name="blackPlayerLabel">
+        <property name="text">
+         <string>Player 2</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QLabel" name="labelDate">
+        <property name="text">
+         <string>Date: 2023-11-15</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>
