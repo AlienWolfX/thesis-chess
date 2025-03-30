@@ -46,12 +46,21 @@ def main():
         print("Operation cancelled.")
         return
     
+    # Create forms directory if it doesn't exist
+    forms_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'forms')
+    if not os.path.exists(forms_dir):
+        os.makedirs(forms_dir)
+        print(f"Created forms directory at {forms_dir}")
+    
     for ui_file in combinedUi:
+        # Create output path in forms directory
         py_file = f"ui_{os.path.splitext(os.path.basename(ui_file))[0]}.py"
+        py_path = os.path.join(forms_dir, py_file)
         
-        if not os.path.exists(py_file) or getTime(ui_file) > getTime(py_file):
+        # Check if update is needed
+        if not os.path.exists(py_path) or getTime(ui_file) > getTime(py_path):
             print(f"Updating {py_file} from {ui_file}")
-            subprocess.run(["pyuic6", "-o", py_file, ui_file])
+            subprocess.run(["pyuic6", "-o", py_path, ui_file])
         else:
             print(f"{py_file} is up to date")
 

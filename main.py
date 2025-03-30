@@ -5,12 +5,11 @@ The main file for the project.
 from PyQt6.QtWidgets import QApplication, QMainWindow, QDialog, QFileDialog, QListWidgetItem
 from PyQt6.QtSvg import QSvgRenderer
 from PyQt6.QtGui import QPixmap, QImage, QPainter
-from PyQt6.QtCore import pyqtSignal, QThread, Qt
-from ui.ui_mainWindow import Ui_MainWindow
-from ui.ui_newGame import Ui_newGame
-from ui.ui_viewHistory import Ui_viewHistoryx
-from ui.ui_about import Ui_about
-from ui.ui_calibration import Ui_calibrateCamera
+from PyQt6.QtCore import Qt
+from forms.ui_mainWindow import Ui_MainWindow
+from forms.ui_newGame import Ui_newGame
+from forms.ui_viewHistory import Ui_viewHistoryx
+from forms.ui_about import Ui_about
 import cv2 as cv
 import chess
 import chess.svg
@@ -44,69 +43,6 @@ class NewGame(QDialog):
         self.ui = Ui_newGame()
         self.ui.setupUi(self)
         self.ui.okButton.clicked.connect(self.close)
-        self.ui.calibrateCameraButton.clicked.connect(self.calibrateCamera)
-        
-    def calibrateCamera(self):
-        self.calibrationDialog = Calibration(self)
-        self.calibrationDialog.exec()
-
-class Calibration(QDialog):
-    ImageUpdate = pyqtSignal(QImage)
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.ui = Ui_calibrateCamera()
-        self.ui.setupUi(self)
-
-        self.cap = cv.VideoCapture(0)
-        self.ThreadActive = False
-
-        self.ImageUpdate.connect(self.imageUpdate)
-
-        self.startCamera()
-
-    def startCamera(self):
-        self.ThreadActive = True
-        self.worker = CameraWorker(self.cap)
-        self.worker.ImageUpdate.connect(self.imageUpdate)
-        self.worker.start()
-
-    def stopCamera(self):
-        self.ThreadActive = False
-        self.worker.stop()
-        self.cap.release() 
-        
-    def imageUpdate(self, image):
-        self.ui.imageOutput.setPixmap(QPixmap.fromImage(image))
-
-    def closeEvent(self, event):
-        self.stopCamera() 
-        super().closeEvent(event)
-
-class CameraWorker(QThread):
-    ImageUpdate = pyqtSignal(QImage)
-
-    def __init__(self, cap):
-        super().__init__()
-        self.cap = cap
-        self.ThreadActive = True
-
-    def run(self):
-        while self.ThreadActive:
-            ret, frame = self.cap.read()
-            if ret:
-                flip = cv.flip(frame, 1)
-                rgbImage = cv.cvtColor(flip, cv.COLOR_BGR2RGB)
-                h, w, ch = rgbImage.shape
-                bytesPerLine = ch * w
-                convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format.Format_RGB888)
-                p = convertToQtFormat.scaled(640, 480, Qt.AspectRatioMode.KeepAspectRatio)
-                self.ImageUpdate.emit(p)
-
-    def stop(self):
-        self.ThreadActive = False
-        self.quit()
-        self.wait()
 
 class ViewHistory(QDialog):
     def __init__(self, parent=None):
@@ -114,16 +50,44 @@ class ViewHistory(QDialog):
         self.ui = Ui_viewHistoryx()
         self.ui.setupUi(self)
         self.chessboard = chess.Board()
+        self.board_size = 600 
         
+        self.ui.chessOutput.setMinimumSize(self.board_size, self.board_size)
+        
+        # Connect signals
         self.ui.loadButton.clicked.connect(self.loadMatch)
         self.ui.matchList.itemClicked.connect(self.displayMatch)
         self.ui.movesList.itemClicked.connect(self.displayMove)
         self.ui.movesList.currentRowChanged.connect(self.displayMove)
+        # Add new button connections
+        self.ui.resetButton.clicked.connect(self.resetView)
+        self.ui.returnButton.clicked.connect(self.close)
         
         # Run Methods
         self.displayMatches()
-        self.renderChessboard()
+        self.renderChessboard(initial=True)
+
+    def resetView(self):
+        """Reset the view to initial state"""
+        # Clear move list
+        self.ui.movesList.clear()
         
+        # Clear match selection
+        self.ui.matchList.clearSelection()
+        
+        # Reset chessboard to starting position
+        self.chessboard.reset()
+        
+        # Render initial board
+        self.renderChessboard(initial=True)
+        
+        # Clear any stored moves
+        if hasattr(self, 'moves_df'):
+            del self.moves_df
+        
+        # Reset current move index
+        self.current_move_index = 0
+
     # Display csv files on matches folder
     def displayMatches(self):
         matches_folder = os.path.join(os.getcwd(), "matches")
@@ -176,29 +140,36 @@ class ViewHistory(QDialog):
             self.chessboard.push_san(move)
         self.renderChessboard()
 
-    def renderChessboard(self):
-        last_move = self.chessboard.peek() if self.chessboard.move_stack else None
-        arrows = []
-        if last_move:
-            arrows.append(chess.svg.Arrow(last_move.from_square, last_move.to_square, color='red'))
-    
-        chessboard_svg = chess.svg.board(self.chessboard, arrows=arrows).encode("UTF-8")
-    
+    def renderChessboard(self, initial=False):
+        # Create board with fixed size for both initial and move displays
+        board_size = {'size': self.board_size}
+        
+        if initial:
+            chessboard_svg = chess.svg.board(self.chessboard, **board_size).encode("UTF-8")
+        else:
+            last_move = self.chessboard.peek() if self.chessboard.move_stack else None
+            arrows = []
+            if last_move:
+                arrows.append(chess.svg.Arrow(last_move.from_square, last_move.to_square, color='red'))
+            chessboard_svg = chess.svg.board(self.chessboard, arrows=arrows, **board_size).encode("UTF-8")
+
+        # Create renderer with fixed size
         svg_renderer = QSvgRenderer(chessboard_svg)
-    
-        image = QImage(800, 800, QImage.Format.Format_ARGB32)
+        
+        # Create image with board size
+        image = QImage(self.board_size, self.board_size, QImage.Format.Format_ARGB32)
         image.fill(0x00ffffff)
         painter = QPainter(image)
         svg_renderer.render(painter)
         painter.end()
         
-        labelSize = self.ui.chessOutput.size()
-        labelWidth = labelSize.width()
-        labelHeight = labelSize.height()
-        
+        # Set pixmap directly at board size
         pixmap = QPixmap.fromImage(image)
-        scaled_pixmap = pixmap.scaled(labelWidth, labelHeight, aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio, transformMode=Qt.TransformationMode.SmoothTransformation)
-        self.ui.chessOutput.setPixmap(scaled_pixmap)
+        self.ui.chessOutput.setPixmap(pixmap)
+        
+        # Ensure dialog size accommodates the board
+        self.adjustSize()
+
 class About(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
