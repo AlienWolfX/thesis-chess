@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>450</width>
-    <height>400</height>
+    <height>401</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -21,7 +21,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>img/app.ico</normaloff>img/app.ico</iconset>
+    <normaloff>../img/app.ico</normaloff>../img/app.ico</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
