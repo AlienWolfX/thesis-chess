@@ -7,11 +7,11 @@ import numpy as np
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-model = YOLO('model/v20.pt').to(device)
+model = YOLO('model/best.pt').to(device)
 
 # Initialize the webcam or IP camera
 # cameraSrc = "https://192.168.6.207:8080/video" # IP Camera URL
-cameraSrc = 1  # Laptop Webcam
+cameraSrc = 0  # Laptop Webcam
 
 cap = cv2.VideoCapture(cameraSrc)
 
