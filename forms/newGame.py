@@ -12,10 +12,10 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_newGame(object):
     def setupUi(self, newGame):
         newGame.setObjectName("newGame")
-        newGame.resize(450, 400)
+        newGame.resize(450, 401)
         newGame.setMinimumSize(QtCore.QSize(400, 350))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("ui\\img/app.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap("ui\\../img/app.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         newGame.setWindowIcon(icon)
         self.verticalLayout = QtWidgets.QVBoxLayout(newGame)
         self.verticalLayout.setObjectName("verticalLayout")
