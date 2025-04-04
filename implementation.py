@@ -10,7 +10,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 model = YOLO('model/best.pt').to(device)
 
 # Initialize the webcam or IP camera
-# cameraSrc = "https://192.168.6.207:8080/video" # IP Camera URL
+# cameraSrc = "https://192.168..207:8080/video" # IP Camera URL
 cameraSrc = 0  # Laptop Webcam
 
 cap = cv2.VideoCapture(cameraSrc)
@@ -301,27 +301,6 @@ while True:
                     mapped_pos = square_coords[closest_square]
                     cv2.line(annotated_frame, (center_x, center_y), mapped_pos, (0, 255, 255), 1)
                     cv2.circle(annotated_frame, mapped_pos, 4, (0, 255, 255), -1)
-                    
-        # Detect and display moves
-        if previous_positions:
-            move_text = []
-            for square, piece in current_positions.items():
-                if square not in previous_positions or previous_positions[square] != piece:
-                    # Find source square
-                    for prev_square, prev_piece in previous_positions.items():
-                        if prev_piece == piece and prev_square != square:
-                            # Draw move arrow
-                            start = square_coords[prev_square]
-                            end = square_coords[square]
-                            cv2.arrowedLine(annotated_frame, start, end, (0, 0, 255), 2)
-                            
-                            # Add move text
-                            move_text.append(f"{piece}: {prev_square}->{square}")
-            
-            # Display moves in window
-            for idx, text in enumerate(move_text):
-                cv2.putText(annotated_frame, text, (10, 50 + 20*idx),
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
         
         previous_positions = current_positions.copy()
 
