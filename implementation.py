@@ -57,7 +57,7 @@ def calibrate_board(results):
             x1, y1, x2, y2 = box.xyxy[0].tolist()
             x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
             center_x = (x1 + x2) // 2
-            center_y = y2  # Always use bottom of bounding box
+            center_y = (y1 + y2) // 2 # Used the middle of the rook for calibration
             piece_label = model.names[int(box.cls)]
             
             piece_data = (center_x, center_y)
@@ -283,7 +283,7 @@ while True:
                 center_y = y2
                 
                 # Draw bounding box and label
-                cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), (255, 0, 0), 1)
+                cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), (255, 255, 255), 1)
                 cv2.putText(annotated_frame, piece_label, (x1, y1 - 5), 
                            cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 0, 0), 1)
                 
