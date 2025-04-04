@@ -2,20 +2,21 @@ import cv2
 import torch
 from ultralytics import YOLO
 import time
-from utils.chessFunctions import fen_to_image, create_board_display
+from utils.chessFunctions import create_board_display
 import numpy as np
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 model = YOLO('model/best.pt').to(device)
 
-# Initialize the webcam or IP camera
+# Initialize the webcam
 # cameraSrc = "https://192.168..207:8080/video" # IP Camera URL
 cameraSrc = 0  # Laptop Webcam
 
 cap = cv2.VideoCapture(cameraSrc)
 
 frame_skip = 2 
+CONFIDENCE_THRESHOLD = 0.70  # Global confidence threshold for detections
 frame_count = 0
 
 # Define a mapping of class names to FEN labels
@@ -34,30 +35,21 @@ class_id_mapping = {
     'White-Rook': 'R',
 }
 
-initial_board = {
-    'a1': 'R', 'b1': 'N', 'c1': 'B', 'd1': 'Q', 'e1': 'K', 'f1': 'B', 'g1': 'N', 'h1': 'R',
-    'a2': 'P', 'b2': 'P', 'c2': 'P', 'd2': 'P', 'e2': 'P', 'f2': 'P', 'g2': 'P', 'h2': 'P',
-    'a7': 'p', 'b7': 'p', 'c7': 'p', 'd7': 'p', 'e7': 'p', 'f7': 'p', 'g7': 'p', 'h7': 'p',
-    'a8': 'r', 'b8': 'n', 'c8': 'b', 'd8': 'q', 'e8': 'k', 'f8': 'b', 'g8': 'n', 'h8': 'r'
-}
-
-# Display the starting board
-start = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
-board = fen_to_image(start)
-# board_image = cv2.imread('current_board.png')
-
 square_coords = {}
 
 def calibrate_board(results):
     piece_positions = {'white_rooks': [], 'black_rooks': []}
     
-    # Detect all rooks
+    # Detect all rooks with high confidence
     for result in results:
         for box in result.boxes:
+            if box.conf[0] < CONFIDENCE_THRESHOLD:
+                continue
+                
             x1, y1, x2, y2 = box.xyxy[0].tolist()
             x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
             center_x = (x1 + x2) // 2
-            center_y = (y1 + y2) // 2 # Used the middle of the rook for calibration
+            center_y = (y1 + y2) // 2  # Using center point
             piece_label = model.names[int(box.cls)]
             
             piece_data = (center_x, center_y)
@@ -108,36 +100,6 @@ def calibrate_board(results):
         
         return True
     return False
-
-def create_fen_from_positions(current_positions):
-    """Convert current piece positions to FEN string"""
-    board = [['' for _ in range(8)] for _ in range(8)]
-    
-    # Fill known piece positions
-    for square, piece in current_positions.items():
-        file = ord(square[0]) - ord('a')
-        rank = 8 - int(square[1])
-        if 0 <= rank < 8 and 0 <= file < 8:
-            board[rank][file] = piece
-    
-    # Convert to FEN
-    fen = []
-    for rank in board:
-        empty = 0
-        rank_str = ''
-        for square in rank:
-            if square == '':
-                empty += 1
-            else:
-                if empty > 0:
-                    rank_str += str(empty)
-                    empty = 0
-                rank_str += square
-        if empty > 0:
-            rank_str += str(empty)
-        fen.append(rank_str)
-    
-    return '/'.join(fen)
 
 def draw_grid(frame, square_coords):
     if all(k in square_coords for k in ['a1', 'h1', 'a8', 'h8']):
@@ -206,13 +168,16 @@ def track_pieces(results):
     current_positions = {}
     for result in results:
         for box in result.boxes:
+            if box.conf[0] < CONFIDENCE_THRESHOLD:
+                continue
+                
             x1, y1, x2, y2 = box.xyxy[0].tolist()
             x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
             center_x = (x1 + x2) // 2
-            center_y = y2 
+            center_y = (y1 + y2) // 2  # Changed to use center point instead of bottom
             piece_label = model.names[int(box.cls)]
             
-            # Find closest square using bottom center of bounding box
+            # Find closest square using center of bounding box
             closest_square = None
             min_distance = float('inf')
             for square, coord in square_coords.items():
@@ -226,22 +191,6 @@ def track_pieces(results):
                 print(f'{piece_label} detected at {closest_square}')
     
     return current_positions
-
-def detect_moves(previous_positions, current_positions):
-    """Detect chess piece movements by comparing positions"""
-    moves = []
-    
-    # Find pieces that moved (either new positions or disappeared)
-    for square, piece in current_positions.items():
-        if square not in previous_positions or previous_positions[square] != piece:
-            for old_square, old_piece in previous_positions.items():
-                if old_piece == piece and old_square != square:
-                    moves.append((piece, old_square, square))
-                    break
-    
-    return moves
-
-previous_positions = {}
 
 # Main loop
 calibrated = False
@@ -276,11 +225,14 @@ while True:
         
         for result in results:
             for box in result.boxes:
+                if box.conf[0] < CONFIDENCE_THRESHOLD: 
+                    continue
+                    
                 x1, y1, x2, y2 = box.xyxy[0].tolist()
                 x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
                 piece_label = model.names[int(box.cls)]
                 center_x = (x1 + x2) // 2
-                center_y = y2
+                center_y = (y1 + y2) // 2  # Changed to use center point
                 
                 # Draw bounding box and label
                 cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), (255, 255, 255), 1)
@@ -301,8 +253,6 @@ while True:
                     mapped_pos = square_coords[closest_square]
                     cv2.line(annotated_frame, (center_x, center_y), mapped_pos, (0, 255, 255), 1)
                     cv2.circle(annotated_frame, mapped_pos, 4, (0, 255, 255), -1)
-        
-        previous_positions = current_positions.copy()
 
     draw_grid(annotated_frame, square_coords)
     cv2.putText(annotated_frame, "Calibrated" if calibrated else "Calibrating...", 
