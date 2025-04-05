@@ -4,6 +4,10 @@ from ultralytics import YOLO
 import time
 from utils.chessFunctions import create_board_display
 import numpy as np
+from collections import deque
+from typing import Dict
+import json
+from collections import Counter
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -18,6 +22,10 @@ cap = cv2.VideoCapture(cameraSrc)
 frame_skip = 2 
 CONFIDENCE_THRESHOLD = 0.70  # Global confidence threshold for detections
 frame_count = 0
+
+BUFFER_SIZE = 10  # Number of frames to keep in buffer
+CONSENSUS_THRESHOLD = 0.4  # 40% agreement threshold for stable state detection
+USE_CENTER_POINT = False
 
 # Define a mapping of class names to FEN labels
 class_id_mapping = {
@@ -37,10 +45,48 @@ class_id_mapping = {
 
 square_coords = {}
 
+class ChessStateBuffer:
+    def __init__(self, buffer_size: int, consensus_threshold: float):
+        self.buffer = deque(maxlen=buffer_size)
+        self.consensus_threshold = consensus_threshold
+        self.current_stable_state = None
+    
+    def add_state(self, state: Dict[str, str]) -> bool:
+        """
+        Add a new state to the buffer and check if we have a stable state.
+        Returns True if the stable state has changed.
+        """
+        # Convert dict to frozen set of items for hashability
+        state_tuple = frozenset(state.items())
+        self.buffer.append(state_tuple)
+        
+        if len(self.buffer) < self.buffer.maxlen * self.consensus_threshold:
+            return False
+            
+        # Count occurrences of each state
+        state_counts = Counter(self.buffer)
+        most_common_state = state_counts.most_common(1)[0]
+        
+        # Check if the most common state appears enough times
+        if (most_common_state[1] / len(self.buffer)) >= self.consensus_threshold:
+            new_stable_state = dict(most_common_state[0])
+            if new_stable_state != self.current_stable_state:
+                self.current_stable_state = new_stable_state
+                return True
+        return False
+
+def get_piece_point(x1: int, y1: int, x2: int, y2: int) -> tuple:
+    """Get the reference point for a piece based on global setting."""
+    center_x = (x1 + x2) // 2
+    if USE_CENTER_POINT:
+        center_y = (y1 + y2) // 2  # Use center point
+    else:
+        center_y = y2  # Use bottom point
+    return (center_x, center_y)
+
 def calibrate_board(results):
     piece_positions = {'white_rooks': [], 'black_rooks': []}
     
-    # Detect all rooks with high confidence
     for result in results:
         for box in result.boxes:
             if box.conf[0] < CONFIDENCE_THRESHOLD:
@@ -48,16 +94,13 @@ def calibrate_board(results):
                 
             x1, y1, x2, y2 = box.xyxy[0].tolist()
             x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
-            center_x = (x1 + x2) // 2
-            center_y = (y1 + y2) // 2  # Using center point
+            piece_point = get_piece_point(x1, y1, x2, y2)
             piece_label = model.names[int(box.cls)]
             
-            piece_data = (center_x, center_y)
-            
             if piece_label == 'White-Rook':
-                piece_positions['white_rooks'].append(piece_data)
+                piece_positions['white_rooks'].append(piece_point)
             elif piece_label == 'Black-Rook':
-                piece_positions['black_rooks'].append(piece_data)
+                piece_positions['black_rooks'].append(piece_point)
     
     # Need all 4 rooks for calibration
     if len(piece_positions['white_rooks']) == 2 and len(piece_positions['black_rooks']) == 2:
@@ -173,15 +216,15 @@ def track_pieces(results):
                 
             x1, y1, x2, y2 = box.xyxy[0].tolist()
             x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
-            center_x = (x1 + x2) // 2
-            center_y = (y1 + y2) // 2  # Changed to use center point instead of bottom
+            piece_point = get_piece_point(x1, y1, x2, y2)
             piece_label = model.names[int(box.cls)]
             
-            # Find closest square using center of bounding box
+            # Find closest square using piece point
             closest_square = None
             min_distance = float('inf')
             for square, coord in square_coords.items():
-                distance = np.sqrt((center_x - coord[0])**2 + (center_y - coord[1])**2)
+                distance = np.sqrt((piece_point[0] - coord[0])**2 + 
+                                 (piece_point[1] - coord[1])**2)
                 if distance < min_distance:
                     min_distance = distance
                     closest_square = square
@@ -193,6 +236,7 @@ def track_pieces(results):
     return current_positions
 
 # Main loop
+state_buffer = ChessStateBuffer(BUFFER_SIZE, CONSENSUS_THRESHOLD)
 calibrated = False
 while True:
     ret, frame = cap.read()
@@ -215,9 +259,17 @@ while True:
     if calibrated:
         current_positions = track_pieces(results)
         
-        # Create and show board visualization
-        board_vis = create_board_display(current_positions)
-        
+        # Add state to buffer and check for stable state
+        if state_buffer.add_state(current_positions):
+            stable_state = state_buffer.current_stable_state
+            print("New stable board state detected:")
+            print(json.dumps(stable_state, indent=2))
+            
+        if state_buffer.current_stable_state:
+            board_vis = create_board_display(state_buffer.current_stable_state)
+        else:
+            board_vis = create_board_display(current_positions)
+            
         # Position the board window
         cv2.namedWindow('Chess Board', cv2.WINDOW_NORMAL)
         cv2.moveWindow('Chess Board', 200, 200)
@@ -231,8 +283,7 @@ while True:
                 x1, y1, x2, y2 = box.xyxy[0].tolist()
                 x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
                 piece_label = model.names[int(box.cls)]
-                center_x = (x1 + x2) // 2
-                center_y = (y1 + y2) // 2  # Changed to use center point
+                piece_point = get_piece_point(x1, y1, x2, y2)
                 
                 # Draw bounding box and label
                 cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), (255, 255, 255), 1)
@@ -243,7 +294,8 @@ while True:
                 closest_square = None
                 min_distance = float('inf')
                 for square, coord in square_coords.items():
-                    distance = np.sqrt((center_x - coord[0])**2 + (center_y - coord[1])**2)
+                    distance = np.sqrt((piece_point[0] - coord[0])**2 + 
+                                     (piece_point[1] - coord[1])**2)
                     if distance < min_distance:
                         min_distance = distance
                         closest_square = square
@@ -251,7 +303,7 @@ while True:
                 if closest_square and min_distance < 50:
                     # Draw connection line to mapped square
                     mapped_pos = square_coords[closest_square]
-                    cv2.line(annotated_frame, (center_x, center_y), mapped_pos, (0, 255, 255), 1)
+                    cv2.line(annotated_frame, piece_point, mapped_pos, (0, 255, 255), 1)
                     cv2.circle(annotated_frame, mapped_pos, 4, (0, 255, 255), -1)
 
     draw_grid(annotated_frame, square_coords)
