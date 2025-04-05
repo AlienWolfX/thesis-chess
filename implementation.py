@@ -11,7 +11,7 @@ from collections import Counter
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-model = YOLO('model/best.pt').to(device)
+model = YOLO('model/meow.pt').to(device)
 
 # Initialize the webcam
 # cameraSrc = "https://192.168..207:8080/video" # IP Camera URL
@@ -121,7 +121,7 @@ def calibrate_board(results):
         
         # Calculate rank positions with adjusted interpolation
         outer_spacing = 7.0  # Keep outer bounds
-        inner_spacing = 7.0  # Increase for tighter inner squares
+        inner_spacing = 7.7  # Increase for tighter inner squares
         
         for rank in range(1, 9):
             # Use outer spacing for overall board dimensions
