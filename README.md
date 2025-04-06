@@ -77,37 +77,19 @@ python implementation.py
 
 ## Findings
 
-### YOLOv8s
+Using Roboflow [v26](https://app.roboflow.com/rookeye/rookeye/26) Dataset version we trained a YOLOv8n model using Google Collab with different batch sizes
 
-Updated on: 01:50 AM
+Batch Size: 32
 
-Roboflow Version: v21
+| Confusion Matrix                              | Results                                |
+| --------------------------------------------- | -------------------------------------- |
+| ![Confusion Matrix](images/batch_32_conf.png) | ![Results](images/batch_32_result.png) |
 
-Url: [Link to Roboflow](https://app.roboflow.com/rookeye/rookeye/21)
+Batch Size: 64
 
-Distance (from top mat to tripod): N/A
-
-Camera Level: N/A
-
-|                        Confusion Matrix                        |                   Results                    |                       Predictions                        |
-| :------------------------------------------------------------: | :------------------------------------------: | :------------------------------------------------------: |
-| ![Confusion Matrix](findings/v21_yolov8s/confusion_matrix.png) | ![Results](findings/v21_yolov8s/results.png) | ![Predictions](findings/v21_yolov8s/val_batch0_pred.jpg) |
-
-### YOLOv8n
-
-Updated on: 01:50 AM
-
-Roboflow Version: v20
-
-Url: [Link to Roboflow](https://app.roboflow.com/rookeye/rookeye/20)
-
-Distance (from top mat to tripod): 30.0 inches
-
-Camera Level: 30.0°
-
-|                        Confusion Matrix                        |                   Results                    |                       Predictions                        |
-| :------------------------------------------------------------: | :------------------------------------------: | :------------------------------------------------------: |
-| ![Confusion Matrix](findings/v20_yolov8n/confusion_matrix.png) | ![Results](findings/v20_yolov8n/results.png) | ![Predictions](findings/v20_yolov8n/val_batch0_pred.jpg) |
+| Confusion Matrix                              | Results                                |
+| --------------------------------------------- | -------------------------------------- |
+| ![Confusion Matrix](images/batch_64_conf.png) | ![Results](images/batch_64_result.png) |
 
 ## License
 

@@ -5,7 +5,7 @@ from ultralytics import YOLO
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # Load the YOLOv8 model
-model = YOLO('model/meow.pt').to(device)
+model = YOLO('model/50_epoch_batch_64.pt').to(device)
 
 # Initialize the webcam ip or usb
 # cameraSrc = "https://{ip}/video" # IP Camera URL

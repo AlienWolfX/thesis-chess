@@ -10,8 +10,9 @@ test/*
 docs/*
 dataset/*
 old_scripts/*
-model/*
 training_ipynb/*
+3d_Stuff/*
+model/old/*
 
 
 # Development files that should not be in the repo
@@ -30,6 +31,5 @@ gray.jpeg
 lines.jpeg
 capturePics.py
 test.py
-*.pt
 findings.py
 yolov8.py
