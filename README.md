@@ -31,7 +31,7 @@
         <li><a href="#built-with">Built With</a></li>
       </ul>
     </li>
-    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#findings">Findings</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
   </ol>
@@ -41,31 +41,31 @@
 
 ## About The Project
 
-<!-- [![Product Name Screen Shot][product-screenshot]](https://example.com) -->
+![Sample](images/sample.gif)
 
-A thesis exploring the application of computer vision in chess, where a camera captures the game state and converts it into a digital format.
+A thesis exploring the Development and Design of a portable chess appliance using YOLOv8.
 
-## Built with
+## Built With
 
 <div align="center">
 
-[![Python][Python]][Python-url] [![OpenCV][OpenCV]][OpenCV-url] [![Qt][Qt]][Qt-url]
+[![Python][Python]][Python-url] [![OpenCV][OpenCV]][OpenCV-url] [![Qt6][Qt6]][Qt-url]
 [![TensorFlow][TensorFlow]][TensorFlow-url] [![PyTorch][PyTorch]][PyTorch-url] [![Pandas][Pandas]][Pandas-url]
-[![NumPy][NumPy]][NumPy-url]
+[![NumPy][NumPy]][NumPy-url] [![YOLOv8][YOLOv8]][YOLOv8-url]
 
 </div>
 
 ## Installation
 
 > [!NOTE]
-> Python 3.10 is required
+> Python 3.10 (for pyqt6-tools to work) but it should work with Python 3.12
 
 ```bash
 # Creating virtual environment (venv)
-python -m venv .env
+python -m venv .venv
 
 # Activating venv
-.env/Scripts/activate
+.venv/Scripts/activate
 
 # Installing dependencies
 pip install -r requirements.txt
@@ -118,7 +118,7 @@ Project Link: [https://github.com/alienwolfx/thesis-chess](https://github.com/al
 [Python-url]: https://www.python.org/
 [OpenCV]: https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge
 [OpenCV-url]: https://opencv.org/
-[Qt]: https://img.shields.io/badge/Qt-41CD52?style=for-the-badge
+[Qt6]: https://img.shields.io/badge/Qt6-41CD52?style=for-the-badge
 [Qt-url]: https://www.qt.io/
 [TensorFlow]: https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge
 [TensorFlow-url]: https://www.tensorflow.org/
@@ -128,3 +128,5 @@ Project Link: [https://github.com/alienwolfx/thesis-chess](https://github.com/al
 [Pandas-url]: https://pandas.pydata.org/
 [NumPy]: https://img.shields.io/badge/NumPy-013243?style=for-the-badge
 [NumPy-url]: https://numpy.org/
+[YOLOv8]: https://img.shields.io/badge/YOLOv8-354fed?style=for-the-badge
+[YOLOv8-url]: https://www.ultralytics.com/
