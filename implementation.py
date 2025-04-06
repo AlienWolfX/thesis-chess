@@ -11,7 +11,7 @@ from collections import Counter
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-model = YOLO('model/50_epoch_batch_64.pt').to(device)
+model = YOLO('model/best.pt').to(device)
 
 # Initialize the webcam
 # cameraSrc = "https://192.168..207:8080/video" # IP Camera URL
