@@ -115,7 +115,7 @@ class ViewHistory(QDialog):
         self.ui = Ui_viewHistory()
         self.ui.setupUi(self)
         self.chessboard = chess.Board()
-        self.board_size = 600 
+        self.board_size = 600
         
         self.ui.chessOutput.setMinimumSize(self.board_size, self.board_size)
         
@@ -124,15 +124,12 @@ class ViewHistory(QDialog):
         self.ui.matchList.itemClicked.connect(self.displayMatch)
         self.ui.movesList.itemClicked.connect(self.displayMove)
         self.ui.movesList.currentRowChanged.connect(self.displayMove)
-        # Add new button connections
         self.ui.resetButton.clicked.connect(self.resetView)
         self.ui.returnButton.clicked.connect(self.close)
         
-        # Sa updating game information planning to change this based sa csv file
-        self.ui.gameNoLabel.setText("5")
-        self.ui.whitePlayerLabel.setText("Magnus Carlsen")
-        self.ui.blackPlayerLabel.setText("Hikaru Nakamura")
-        self.ui.labelDate.setText("Date: 2023-11-20")
+        # Initialize game state
+        self.current_move_index = 0
+        self.moves = []
         
         # Run Methods
         self.displayMatches()
@@ -167,16 +164,8 @@ class ViewHistory(QDialog):
                 if file_name.endswith(".csv"):
                     self.ui.matchList.addItem(file_name)
 
-    def displayMatch(self, item):
-        match_file = item.text()
-        matches_folder = os.path.join(os.getcwd(), "matches")
-        match_path = os.path.join(matches_folder, match_file)
-        if os.path.exists(match_path):
-            self.fetch_moves(match_path)
-            self.display_moves_list()
-
-    # Open file if wala sa matches folder naka store ang csv
     def loadMatch(self):
+        """Load and display moves from a CSV file"""
         fname, _ = QFileDialog.getOpenFileName(
             self,
             "Open File",
@@ -184,31 +173,111 @@ class ViewHistory(QDialog):
             "CSV files (*.csv);;All Files (*)"
         )
         if fname:
-            file_name = os.path.basename(fname)
-            self.ui.matchList.addItem(file_name)
+            # Copy file to matches folder if it doesn't exist there
+            matches_folder = os.path.join(os.getcwd(), "matches")
+            if not os.path.exists(matches_folder):
+                os.makedirs(matches_folder)
                 
+            file_name = os.path.basename(fname)
+            match_path = os.path.join(matches_folder, file_name)
+            
+            # Copy file if it's not already in matches folder
+            if fname != match_path:
+                import shutil
+                shutil.copy2(fname, match_path)
+            
+            # Add to list and display moves
+            item = QListWidgetItem(file_name)
+            self.ui.matchList.addItem(item)
+            self.displayMatch(item)
+
+    def displayMatch(self, item):
+        """Display moves from selected match"""
+        if not item:
+            return
+            
+        match_file = item.text()
+        matches_folder = os.path.join(os.getcwd(), "matches")
+        match_path = os.path.join(matches_folder, match_file)
+        
+        if os.path.exists(match_path):
+            try:
+                # Load and display moves
+                self.fetch_moves(match_path)
+                self.display_moves_list()
+                
+                # Select first move
+                if self.ui.movesList.count() > 0:
+                    self.ui.movesList.setCurrentRow(0)
+                    
+                print(f"Loaded {self.ui.movesList.count()} moves from {match_file}")
+            except Exception as e:
+                QMessageBox.warning(self, "Error", f"Failed to load moves: {str(e)}")
+
     def fetch_moves(self, csv_path):
+        """Read and process moves from CSV file"""
         self.moves_df = pd.read_csv(csv_path)
+        
+        # Update game information
+        if len(self.moves_df) > 0:
+            first_move = self.moves_df.iloc[0]
+            last_move = self.moves_df.iloc[-1]
+            
+            # Update game information labels
+            self.ui.gameNoLabel.setText(os.path.splitext(os.path.basename(csv_path))[0])
+            self.ui.labelDate.setText(f"Date: {first_move['Timestamp'].split()[0]}")
+            
+            # Track players based on their moves
+            white_moves = self.moves_df[self.moves_df['Player'] == 'White']
+            black_moves = self.moves_df[self.moves_df['Player'] == 'Black']
+            
+            if not white_moves.empty:
+                self.ui.whitePlayerLabel.setText("White")
+            if not black_moves.empty:
+                self.ui.blackPlayerLabel.setText("Black")
+        
         self.chessboard.reset()
         self.current_move_index = 0
 
     def display_moves_list(self):
+        """Display moves in the moves list"""
         self.ui.movesList.clear()
         for index, row in self.moves_df.iterrows():
-            move_item = QListWidgetItem(f"{row['timestamp']}: {row['move']}")
+            # Format the move display
+            timestamp = row['Timestamp'].split()[1]  # Get only the time part
+            move = row['Move']
+            player = row['Player']
+            move_text = f"{index + 1}. {player}: {move} ({timestamp})"
+            
+            move_item = QListWidgetItem(move_text)
             move_item.setData(Qt.ItemDataRole.UserRole, index)
             self.ui.movesList.addItem(move_item)
-    
+
     def displayMove(self, index):
+        """Display the selected move on the chessboard"""
+        if not hasattr(self, 'moves_df') or self.moves_df.empty:
+            return
+            
         if isinstance(index, QListWidgetItem):
             move_index = index.data(Qt.ItemDataRole.UserRole)
         else:
             move_index = index
 
+        if move_index < 0:
+            return
+
         self.chessboard.reset()
         for i in range(move_index + 1):
-            move = self.moves_df.iloc[i]['move']
-            self.chessboard.push_san(move)
+            move = self.moves_df.iloc[i]['Move']
+            # Convert the move format from 'e2-e4' to 'e2e4'
+            from_square, to_square = move.split('-')
+            chess_move = chess.Move.from_uci(from_square + to_square)
+            try:
+                self.chessboard.push(chess_move)
+            except chess.IllegalMoveError:
+                QMessageBox.warning(self, "Error", f"Illegal move detected: {move}")
+                break
+                
         self.renderChessboard()
 
     def renderChessboard(self, initial=False):

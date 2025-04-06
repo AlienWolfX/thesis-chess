@@ -16,6 +16,7 @@ model/old/*
 
 
 # Development files that should not be in the repo
+*.csv
 .env
 fen.png
 prediction.jpg

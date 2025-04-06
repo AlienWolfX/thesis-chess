@@ -8,10 +8,13 @@ from collections import deque
 from typing import Dict
 import json
 from collections import Counter
+import csv
+from datetime import datetime
+import os
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-model = YOLO('model/best.pt').to(device)
+model = YOLO('model/v27.pt').to(device)
 
 # Initialize the webcam
 # cameraSrc = "https://192.168..207:8080/video" # IP Camera URL
@@ -20,12 +23,15 @@ cameraSrc = 0  # Laptop Webcam
 cap = cv2.VideoCapture(cameraSrc)
 
 frame_skip = 2 
-CONFIDENCE_THRESHOLD = 0.50  # Global confidence threshold for detections
+CONFIDENCE_THRESHOLD = 0.60  # Global confidence threshold for detections
 frame_count = 0
 
 BUFFER_SIZE = 10  # Number of frames to keep in buffer
 CONSENSUS_THRESHOLD = 0.4  # 40% agreement threshold for stable state detection
 USE_CENTER_POINT = False
+
+MOVES_FILE = 'chess_moves.csv'
+last_stable_state = None
 
 # Define a mapping of class names to FEN labels
 class_id_mapping = {
@@ -235,9 +241,51 @@ def track_pieces(results):
     
     return current_positions
 
+def save_move_to_csv(old_state: Dict[str, str], new_state: Dict[str, str]) -> None:
+    """
+    Compare two board states and save the detected move to CSV.
+    """
+    if old_state is None:
+        return
+        
+    # Find differences between states
+    moved_from = None
+    moved_to = None
+    piece_moved = None
+    
+    for square in set(old_state.keys()) | set(new_state.keys()):
+        old_piece = old_state.get(square)
+        new_piece = new_state.get(square)
+        
+        if old_piece != new_piece:
+            if old_piece and not new_piece:
+                moved_from = square
+                piece_moved = old_piece
+            elif new_piece and not old_piece:
+                moved_to = square
+    
+    if moved_from and moved_to and piece_moved:
+        # Determine if it's a white or black move
+        player = "White" if piece_moved.isupper() else "Black"
+        move = f"{moved_from}-{moved_to}"
+        
+        # Create CSV file if it doesn't exist
+        file_exists = os.path.isfile(MOVES_FILE)
+        with open(MOVES_FILE, 'a', newline='') as f:
+            writer = csv.writer(f)
+            if not file_exists:
+                writer.writerow(['Timestamp', 'Player', 'Move'])
+            writer.writerow([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 
+                           player, 
+                           move])
+
 # Main loop
 state_buffer = ChessStateBuffer(BUFFER_SIZE, CONSENSUS_THRESHOLD)
 calibrated = False
+
+# Declare global variable before using it
+last_stable_state = None
+
 while True:
     ret, frame = cap.read()
     if not ret:
@@ -264,6 +312,11 @@ while True:
             stable_state = state_buffer.current_stable_state
             print("New stable board state detected:")
             print(json.dumps(stable_state, indent=2))
+            
+            # Save move to CSV when board state changes
+            if last_stable_state is not None:
+                save_move_to_csv(last_stable_state, stable_state)
+            last_stable_state = stable_state.copy()
             
         if state_buffer.current_stable_state:
             board_vis = create_board_display(state_buffer.current_stable_state)
