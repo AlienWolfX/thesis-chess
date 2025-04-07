@@ -23,14 +23,14 @@ cameraSrc = 0  # Laptop Webcam
 cap = cv2.VideoCapture(cameraSrc)
 
 frame_skip = 2 
-CONFIDENCE_THRESHOLD = 0.60  # Global confidence threshold for detections
+CONFIDENCE_THRESHOLD = 0.40  # Global confidence threshold for detections
 frame_count = 0
 
 BUFFER_SIZE = 10  # Number of frames to keep in buffer
 CONSENSUS_THRESHOLD = 0.4  # 40% agreement threshold for stable state detection
 USE_CENTER_POINT = False
 
-MOVES_FILE = 'chess_moves.csv'
+MOVES_FILE = 'matches/chess_moves.csv'
 last_stable_state = None
 
 # Define a mapping of class names to FEN labels
