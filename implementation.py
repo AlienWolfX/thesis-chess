@@ -12,28 +12,27 @@ import csv
 from datetime import datetime
 import os
 
+
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
+#### SETTINGS ####
 model = YOLO('model/v27.pt').to(device)
-
 # Initialize the webcam
 # cameraSrc = "https://192.168..207:8080/video" # IP Camera URL
 cameraSrc = 0  # Laptop Webcam
-
 cap = cv2.VideoCapture(cameraSrc)
-
 frame_skip = 2 
-CONFIDENCE_THRESHOLD = 0.40  # Global confidence threshold for detections
 frame_count = 0
 
+CONFIDENCE_THRESHOLD = 0.40  # Global confidence threshold for detections
 BUFFER_SIZE = 10  # Number of frames to keep in buffer
 CONSENSUS_THRESHOLD = 0.4  # 40% agreement threshold for stable state detection
 USE_CENTER_POINT = False
-
+SHOW_LIVE_WINDOW = True 
 MOVES_FILE = 'matches/chess_moves.csv'
 last_stable_state = None
 
-SHOW_LIVE_WINDOW = True 
+
 
 # Define a mapping of class names to FEN labels
 class_id_mapping = {
