@@ -41,7 +41,13 @@
 
 ## About The Project
 
-![Sample](images/sample.gif)
+#### Top View
+
+![Side View](images/top_view.gif)
+
+#### Side View
+
+![Top View](images/side_view.gif)
 
 A thesis exploring the Development and Design of a portable chess appliance using YOLOv8.
 

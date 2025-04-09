@@ -33,6 +33,8 @@ USE_CENTER_POINT = False
 MOVES_FILE = 'matches/chess_moves.csv'
 last_stable_state = None
 
+SHOW_LIVE_WINDOW = True 
+
 # Define a mapping of class names to FEN labels
 class_id_mapping = {
     'Black-Bishop': 'b',
@@ -297,12 +299,15 @@ while True:
 
     resized_frame = cv2.resize(frame, (620, 540))
     results = model(resized_frame)
-    annotated_frame = resized_frame.copy()
+    
+    # Only create annotated frame if we're showing live window
+    annotated_frame = resized_frame.copy() if SHOW_LIVE_WINDOW else None
 
     if not calibrated:
         calibrated = calibrate_board(results)
     
-    draw_grid(annotated_frame, square_coords)
+    if SHOW_LIVE_WINDOW:
+        draw_grid(annotated_frame, square_coords)
     
     if calibrated:
         current_positions = track_pieces(results)
@@ -328,42 +333,44 @@ while True:
         cv2.moveWindow('Chess Board', 200, 200)
         cv2.imshow('Chess Board', board_vis)
         
-        for result in results:
-            for box in result.boxes:
-                if box.conf[0] < CONFIDENCE_THRESHOLD: 
-                    continue
+        # Only process visualization if live window is enabled
+        if SHOW_LIVE_WINDOW:
+            for result in results:
+                for box in result.boxes:
+                    if box.conf[0] < CONFIDENCE_THRESHOLD: 
+                        continue
+                        
+                    x1, y1, x2, y2 = box.xyxy[0].tolist()
+                    x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
+                    piece_label = model.names[int(box.cls)]
+                    piece_point = get_piece_point(x1, y1, x2, y2)
                     
-                x1, y1, x2, y2 = box.xyxy[0].tolist()
-                x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
-                piece_label = model.names[int(box.cls)]
-                piece_point = get_piece_point(x1, y1, x2, y2)
-                
-                # Draw bounding box and label
-                cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), (255, 255, 255), 1)
-                cv2.putText(annotated_frame, piece_label, (x1, y1 - 5), 
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 0, 0), 1)
-                
-                # Find closest square
-                closest_square = None
-                min_distance = float('inf')
-                for square, coord in square_coords.items():
-                    distance = np.sqrt((piece_point[0] - coord[0])**2 + 
-                                     (piece_point[1] - coord[1])**2)
-                    if distance < min_distance:
-                        min_distance = distance
-                        closest_square = square
-                
-                if closest_square and min_distance < 50:
-                    # Draw connection line to mapped square
-                    mapped_pos = square_coords[closest_square]
-                    cv2.line(annotated_frame, piece_point, mapped_pos, (0, 255, 255), 1)
-                    cv2.circle(annotated_frame, mapped_pos, 4, (0, 255, 255), -1)
+                    # Draw bounding box and label
+                    cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), (255, 255, 255), 1)
+                    cv2.putText(annotated_frame, piece_label, (x1, y1 - 5), 
+                               cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 0, 0), 1)
+                    
+                    # Find closest square
+                    closest_square = None
+                    min_distance = float('inf')
+                    for square, coord in square_coords.items():
+                        distance = np.sqrt((piece_point[0] - coord[0])**2 + 
+                                         (piece_point[1] - coord[1])**2)
+                        if distance < min_distance:
+                            min_distance = distance
+                            closest_square = square
+                    
+                    if closest_square and min_distance < 50:
+                        # Draw connection line to mapped square
+                        mapped_pos = square_coords[closest_square]
+                        cv2.line(annotated_frame, piece_point, mapped_pos, (0, 255, 255), 1)
+                        cv2.circle(annotated_frame, mapped_pos, 4, (0, 255, 255), -1)
 
-    draw_grid(annotated_frame, square_coords)
-    cv2.putText(annotated_frame, "Calibrated" if calibrated else "Calibrating...", 
-                (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-    
-    cv2.imshow('Live', annotated_frame)
+    if SHOW_LIVE_WINDOW:
+        draw_grid(annotated_frame, square_coords)
+        cv2.putText(annotated_frame, "Calibrated" if calibrated else "Calibrating...", 
+                    (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        cv2.imshow('Live', annotated_frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
