@@ -32,9 +32,6 @@ SHOW_LIVE_WINDOW = True
 MOVES_FILE = 'matches/chess_moves.csv'
 last_stable_state = None
 
-
-
-# Define a mapping of class names to FEN labels
 class_id_mapping = {
     'Black-Bishop': 'b',
     'Black-King': 'k',

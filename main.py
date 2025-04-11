@@ -272,9 +272,9 @@ class ViewHistory(QDialog):
             # Convert the move format from 'e2-e4' to 'e2e4'
             from_square, to_square = move.split('-')
             chess_move = chess.Move.from_uci(from_square + to_square)
-            try:
+            if chess_move in self.chessboard.legal_moves:
                 self.chessboard.push(chess_move)
-            except chess.IllegalMoveError:
+            else:
                 QMessageBox.warning(self, "Error", f"Illegal move detected: {move}")
                 break
                 
