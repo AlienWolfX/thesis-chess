@@ -7,6 +7,7 @@
 
 
 from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtSvgWidgets import QSvgWidget
 
 
 class Ui_ChessGameWindow(object):
@@ -118,4 +119,4 @@ class Ui_ChessGameWindow(object):
         self.player1Group.setTitle(_translate("ChessGameWindow", "White Player"))
         self.player2Group.setTitle(_translate("ChessGameWindow", "Black Player"))
         self.endButton.setText(_translate("ChessGameWindow", "End Game"))
-from qsvgwidget import QSvgWidget
+

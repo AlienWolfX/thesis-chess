@@ -33,7 +33,10 @@ class MainWindow(QMainWindow):
                 print(f"Starting new game: {game_details['game_name']}")
                 print(f"White player: {game_details['white_player']}")
                 print(f"Black player: {game_details['black_player']}")
-                # Add your game initialization code here
+                
+                # Open the ChessGameWindow and pass the game details
+                self.chessGameWindow = ChessGameWindow(game_details)
+                self.chessGameWindow.show()
         
     def viewHistory(self):
         self.viewHistoryWindow = ViewHistory(self)
@@ -42,6 +45,24 @@ class MainWindow(QMainWindow):
     def menuHelp(self):
         self.aboutDialog = About(self)
         self.aboutDialog.exec()
+
+class ChessGameWindow(QMainWindow):
+    def __init__(self, game_details, parent=None):
+        super().__init__(parent)
+        from forms.chessgame import Ui_ChessGameWindow
+        self.ui = Ui_ChessGameWindow()
+        self.ui.setupUi(self)
+        
+        # Set the game details in the UI
+        self.ui.player1Name.setText(game_details['white_player'])
+        self.ui.player2Name.setText(game_details['black_player'])
+        
+        # Connect the End Game button to close the window
+        self.ui.endButton.clicked.connect(self.endGame)
+
+    def endGame(self):
+        """Close the ChessGameWindow and return to MainWindow."""
+        self.close()
 
 class NewGame(QDialog):
     def __init__(self, parent=None):

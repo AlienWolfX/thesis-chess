@@ -1,5 +1,4 @@
 # Development Folders
-# Gi comment usa nako ang model folder kay need pa e finalize para sab maka save ug space sa repo
 .venv/*
 __pycache__/*
 .idea/*

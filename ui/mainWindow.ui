@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>img/app.ico</normaloff>img/app.ico</iconset>
+    <normaloff>../img/app.ico</normaloff>../img/app.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -25,6 +25,7 @@
        <font>
         <family>Segoe UI Semibold</family>
         <pointsize>36</pointsize>
+        <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
@@ -80,7 +81,7 @@
      <x>0</x>
      <y>0</y>
      <width>928</width>
-     <height>23</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMenu">
@@ -90,13 +91,6 @@
     <addaction name="actionNew_Game"/>
     <addaction name="separator"/>
     <addaction name="actionOpen_CSV"/>
-    <addaction name="actionExport_to_CSV"/>
-    <addaction name="separator"/>
-   </widget>
-   <widget class="QMenu" name="menuOptions">
-    <property name="title">
-     <string>Options</string>
-    </property>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -105,7 +99,6 @@
     <addaction name="actionAbout"/>
    </widget>
    <addaction name="menuMenu"/>
-   <addaction name="menuOptions"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
