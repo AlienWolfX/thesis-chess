@@ -61,41 +61,17 @@ A thesis exploring the Development and Design of a portable chess appliance usin
 
 </div>
 
-## Installation
-
-> [!NOTE]
-> Python 3.10 (for pyqt6-tools to work) but it should work with Python 3.12
-
-```bash
-# Creating virtual environment (venv)
-python -m venv .venv
-
-# Activating venv
-.venv/Scripts/activate
-
-# Installing dependencies
-pip install -r requirements.txt
-
-# Run
-python implementation.py
-
-```
-
 ## Findings
 
-Using Roboflow [v26](https://app.roboflow.com/rookeye/rookeye/26) Dataset version we trained a YOLOv8n model using Google Collab with different batch sizes
+Using Roboflow [v27](https://app.roboflow.com/rookeye/rookeye/27) Dataset version we trained a YOLOv8n model using Google Collab with different batch sizes
 
-Batch Size: 32
+| Confusion Matrix                                      | Results                                    |
+| ----------------------------------------------------- | ------------------------------------------ |
+| ![Confusion Matrix](images/v27_70EPOCH_confusion.png) | ![Results](images/v27_70EPOCH_results.png) |
 
-| Confusion Matrix                              | Results                                |
-| --------------------------------------------- | -------------------------------------- |
-| ![Confusion Matrix](images/batch_32_conf.png) | ![Results](images/batch_32_result.png) |
+## Handling Game State
 
-Batch Size: 64
-
-| Confusion Matrix                              | Results                                |
-| --------------------------------------------- | -------------------------------------- |
-| ![Confusion Matrix](images/batch_64_conf.png) | ![Results](images/batch_64_result.png) |
+Game state is saved in pgn format
 
 ## License
 
