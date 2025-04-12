@@ -11,7 +11,8 @@ from collections import Counter
 import csv
 from datetime import datetime
 import os
-
+import chess
+import chess.pgn
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -29,7 +30,8 @@ BUFFER_SIZE = 10  # Number of frames to keep in buffer
 CONSENSUS_THRESHOLD = 0.4  # 40% agreement threshold for stable state detection
 USE_CENTER_POINT = False
 SHOW_LIVE_WINDOW = True 
-MOVES_FILE = 'matches/chess_moves.csv'
+gameName = datetime.now().strftime("%Y%m%d_%H%M")
+MOVES_FILE = f'matches/game_{gameName}_.csv'
 last_stable_state = None
 
 class_id_mapping = {
@@ -48,6 +50,39 @@ class_id_mapping = {
 }
 
 square_coords = {}
+
+def ensure_directories():
+    """Ensure required directories exist"""
+    os.makedirs("matches", exist_ok=True)
+
+class PGNRecorder:
+    def __init__(self, game_name: str, white_player: str = "White", black_player: str = "Black"):
+        self.game = chess.pgn.Game()
+        self.game.headers["Event"] = f"Game {game_name}"
+        self.game.headers["Site"] = "Chess Tracking System"
+        self.game.headers["Date"] = datetime.now().strftime("%Y.%m.%d")
+        self.game.headers["Round"] = "1"
+        self.game.headers["White"] = white_player
+        self.game.headers["Black"] = black_player
+        self.game.headers["Result"] = "*"
+        
+        self.board = chess.Board()
+        self.node = self.game
+        self.moves_played = 0
+        self.current_move_number = 1
+        self.is_white_move = True
+        self.move_history = [] 
+
+    def format_move_number(self) -> str:
+        """Return the current move number if it's white's turn"""
+        return f"{self.current_move_number}." if self.is_white_move else ""
+    
+    def add_move_to_history(self, san_move: str) -> None:
+        """Add formatted move to history"""
+        if self.is_white_move:
+            self.move_history.append(f"{self.current_move_number}. {san_move}")
+        else:
+            self.move_history.append(san_move)
 
 class ChessStateBuffer:
     def __init__(self, buffer_size: int, consensus_threshold: float):
@@ -239,10 +274,8 @@ def track_pieces(results):
     
     return current_positions
 
-def save_move_to_csv(old_state: Dict[str, str], new_state: Dict[str, str]) -> None:
-    """
-    Compare two board states and save the detected move to CSV.
-    """
+def save_move_to_csv_and_pgn(old_state: Dict[str, str], new_state: Dict[str, str], pgn_recorder: PGNRecorder) -> None:
+    """Compare two board states and store the detected move."""
     if old_state is None:
         return
         
@@ -250,6 +283,7 @@ def save_move_to_csv(old_state: Dict[str, str], new_state: Dict[str, str]) -> No
     moved_from = None
     moved_to = None
     piece_moved = None
+    captured_piece = None
     
     for square in set(old_state.keys()) | set(new_state.keys()):
         old_piece = old_state.get(square)
@@ -259,23 +293,73 @@ def save_move_to_csv(old_state: Dict[str, str], new_state: Dict[str, str]) -> No
             if old_piece and not new_piece:
                 moved_from = square
                 piece_moved = old_piece
-            elif new_piece and not old_piece:
+            elif new_piece:
                 moved_to = square
+                # If there was a piece in the destination square, it was captured
+                if square in old_state:
+                    captured_piece = old_state[square]
     
     if moved_from and moved_to and piece_moved:
-        # Determine if it's a white or black move
-        player = "White" if piece_moved.isupper() else "Black"
-        move = f"{moved_from}-{moved_to}"
+        try:
+            # Create chess move (python-chess will handle capture notation)
+            chess_move = chess.Move.from_uci(f"{moved_from}{moved_to}")
+            if chess_move in pgn_recorder.board.legal_moves:
+                # Get algebraic notation (will include 'x' for captures)
+                san_move = pgn_recorder.board.san(chess_move)
+                
+                # Add move to history
+                pgn_recorder.add_move_to_history(san_move)
+                
+                # Update game state
+                pgn_recorder.node = pgn_recorder.node.add_variation(chess_move)
+                pgn_recorder.board.push(chess_move)
+                pgn_recorder.moves_played += 1
+                
+                # Update move counter
+                if not piece_moved.isupper():  # After black's move
+                    pgn_recorder.current_move_number += 1
+                pgn_recorder.is_white_move = not pgn_recorder.is_white_move
+                
+                move_text = san_move
+                if captured_piece:
+                    print(f"Capture detected: {piece_moved} takes {captured_piece} on {moved_to}")
+                print(f"Move {move_text} recorded. Total moves: {pgn_recorder.moves_played}")
+                
+        except Exception as e:
+            print(f"Error recording move: {e}")
+
+def finalize_game(pgn_recorder: PGNRecorder, result: str = "*") -> None:
+    """Finalize the game and save both PGN and CSV files."""
+    try:
+        # Update game result
+        pgn_recorder.game.headers["Result"] = result
         
-        # Create CSV file if it doesn't exist
-        file_exists = os.path.isfile(MOVES_FILE)
-        with open(MOVES_FILE, 'a', newline='') as f:
+        # Generate timestamp for filenames
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+        game_name = pgn_recorder.game.headers["Event"].replace("Game ", "")
+        
+        # Save PGN file
+        pgn_filename = f"matches/game_{game_name}_final.pgn"
+        with open(pgn_filename, "w") as f:
+            print(pgn_recorder.game, file=f)
+            
+        # Save CSV file with move history
+        ensure_directories()
+        with open(MOVES_FILE, 'w', newline='') as f:
             writer = csv.writer(f)
-            if not file_exists:
-                writer.writerow(['Timestamp', 'Player', 'Move'])
-            writer.writerow([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 
-                           player, 
-                           move])
+            writer.writerow(['Game', 'Timestamp', 'Moves'])
+            for move in pgn_recorder.move_history:
+                writer.writerow([
+                    game_name,
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    move
+                ])
+            
+        print(f"Game saved to {pgn_filename}")
+        print(f"Total moves recorded: {pgn_recorder.moves_played}")
+        
+    except Exception as e:
+        print(f"Error saving files: {e}")
 
 # Main loop
 state_buffer = ChessStateBuffer(BUFFER_SIZE, CONSENSUS_THRESHOLD)
@@ -283,6 +367,14 @@ calibrated = False
 
 # Declare global variable before using it
 last_stable_state = None
+
+# Initialize PGN recorder before the main loop
+ensure_directories()
+pgn_recorder = PGNRecorder(
+    game_name=datetime.now().strftime("%Y%m%d_%H%M"),
+    white_player="White",
+    black_player="Black"
+)
 
 while True:
     ret, frame = cap.read()
@@ -314,9 +406,9 @@ while True:
             print("New stable board state detected:")
             print(json.dumps(stable_state, indent=2))
             
-            # Save move to CSV when board state changes
+            # Save move to CSV and PGN when board state changes
             if last_stable_state is not None:
-                save_move_to_csv(last_stable_state, stable_state)
+                save_move_to_csv_and_pgn(last_stable_state, stable_state, pgn_recorder)
             last_stable_state = stable_state.copy()
             
         if state_buffer.current_stable_state:
@@ -369,6 +461,7 @@ while True:
         cv2.imshow('Live', annotated_frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
+        finalize_game(pgn_recorder) 
         break
 
 cap.release()
