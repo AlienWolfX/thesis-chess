@@ -1,7 +1,6 @@
 import cv2
 import torch
 from ultralytics import YOLO
-import time
 from utils.chessFunctions import create_board_display
 import numpy as np
 from collections import deque
@@ -18,9 +17,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 #### SETTINGS ####
 model = YOLO('model/v29.pt').to(device)
-# Initialize the webcam
-# cameraSrc = "https://192.168..207:8080/video" # IP Camera URL
-cameraSrc = 0  # Laptop Webcam
+cameraSrc = 0 
 cap = cv2.VideoCapture(cameraSrc)
 frame_skip = 2 
 frame_count = 0

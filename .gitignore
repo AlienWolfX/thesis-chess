@@ -15,6 +15,9 @@ model/old/*
 
 
 # Development files that should not be in the repo
+
+tech_report.md
+
 *.pgn
 *.csv
 .env
