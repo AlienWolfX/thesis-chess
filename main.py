@@ -13,6 +13,7 @@ from forms.about import Ui_about
 import cv2 as cv
 import chess
 import chess.svg
+import chess.pgn
 import os
 import pandas as pd
 
@@ -33,6 +34,8 @@ class MainWindow(QMainWindow):
                 print(f"Starting new game: {game_details['game_name']}")
                 print(f"White player: {game_details['white_player']}")
                 print(f"Black player: {game_details['black_player']}")
+                print(f"Round: {game_details['round']}")
+                print(f"Site: {game_details['site']}")
                 
                 # Open the ChessGameWindow and pass the game details
                 self.chessGameWindow = ChessGameWindow(game_details)
@@ -49,9 +52,14 @@ class MainWindow(QMainWindow):
 class ChessGameWindow(QMainWindow):
     def __init__(self, game_details, parent=None):
         super().__init__(parent)
-        from forms.chessgame import Ui_ChessGameWindow
+        from forms.chessGame import Ui_ChessGameWindow
         self.ui = Ui_ChessGameWindow()
         self.ui.setupUi(self)
+        
+        # Set game information
+        self.ui.gameNameLabel.setText(f"Game: {game_details['game_name']}")
+        self.ui.roundLabel.setText(f"Round: {game_details['round']}")
+        self.ui.siteLabel.setText(f"Site: {game_details['site']}")
         
         # Set the game details in the UI
         self.ui.player1Name.setText(game_details['white_player'])
@@ -74,7 +82,9 @@ class NewGame(QDialog):
         self.game_details = {
             'game_name': '',
             'white_player': '',
-            'black_player': ''
+            'black_player': '',
+            'round': '',
+            'site': '' 
         }
         
         # Connect buttons and validation
@@ -82,38 +92,63 @@ class NewGame(QDialog):
         self.ui.gameNameEdit.textChanged.connect(self.validateGameName)
         self.ui.whitePlayerEdit.textChanged.connect(self.validatePlayerName)
         self.ui.blackPlayerEdit.textChanged.connect(self.validatePlayerName)
+        self.ui.roundEdit.textChanged.connect(self.validateRound)
+        self.ui.siteEdit.textChanged.connect(self.validateSite) 
 
     def validateGameName(self):
-        """Validate game name to only allow numbers"""
+        """Validate game name to allow alphanumeric characters"""
         game_name = self.ui.gameNameEdit.text()
-        if not game_name.isdigit() and game_name != '':
+        if not game_name.isalnum() and game_name != '':
             self.ui.gameNameEdit.setText(game_name[:-1])
 
     def validatePlayerName(self):
-        """Validate player names to only allow letters and spaces"""
+        """Validate player names to allow alphanumeric characters and spaces"""
         for edit in [self.ui.whitePlayerEdit, self.ui.blackPlayerEdit]:
             player_name = edit.text()
-            if not all(c.isalpha() or c.isspace() for c in player_name) and player_name != '':
+            if not all(c.isalnum() or c.isspace() for c in player_name) and player_name != '':
                 edit.setText(player_name[:-1])
+
+    def validateRound(self):
+        """Validate round to only allow integers"""
+        round_text = self.ui.roundEdit.text()
+        if not round_text.isdigit() and round_text != '':
+            self.ui.roundEdit.setText(round_text[:-1])
+
+    def validateSite(self):
+        """Validate site to allow alphanumeric characters and spaces"""
+        site = self.ui.siteEdit.text()
+        if not all(c.isalnum() or c.isspace() for c in site) and site != '':
+            self.ui.siteEdit.setText(site[:-1])
 
     def validateAndSave(self):
         """Validate all fields before saving"""
         game_name = self.ui.gameNameEdit.text()
         white_player = self.ui.whitePlayerEdit.text()
         black_player = self.ui.blackPlayerEdit.text()
+        round_number = self.ui.roundEdit.text()
+        site = self.ui.siteEdit.text()  # Add site field
 
         # Check if fields are empty
-        if not all([game_name, white_player, black_player]):
+        if not all([game_name, white_player, black_player, round_number, site]):  # Include site
             QMessageBox.warning(self, "Validation Error", "All fields must be filled")
             return
 
         # Additional validation
-        if not game_name.isdigit():
-            QMessageBox.warning(self, "Validation Error", "Game name must contain only numbers")
+        if not game_name.isalnum():
+            QMessageBox.warning(self, "Validation Error", "Game name must contain only letters and numbers")
             return
 
-        if not all(c.isalpha() or c.isspace() for c in white_player + black_player):
-            QMessageBox.warning(self, "Validation Error", "Player names must contain only letters")
+        if not all(c.isalnum() or c.isspace() for c in white_player + black_player):
+            QMessageBox.warning(self, "Validation Error", "Player names must contain only letters, numbers and spaces")
+            return
+
+        if not round_number.isdigit():
+            QMessageBox.warning(self, "Validation Error", "Round must be a number")
+            return
+
+        # Add site validation
+        if not all(c.isalnum() or c.isspace() for c in site):
+            QMessageBox.warning(self, "Validation Error", "Site must contain only letters, numbers and spaces")
             return
 
         # If all validations pass, save and accept
@@ -124,6 +159,8 @@ class NewGame(QDialog):
         self.game_details['game_name'] = self.ui.gameNameEdit.text()
         self.game_details['white_player'] = self.ui.whitePlayerEdit.text()
         self.game_details['black_player'] = self.ui.blackPlayerEdit.text()
+        self.game_details['round'] = self.ui.roundEdit.text()
+        self.game_details['site'] = self.ui.siteEdit.text() 
         self.accept()
 
     def getGameDetails(self):
@@ -164,6 +201,12 @@ class ViewHistory(QDialog):
         # Clear match selection
         self.ui.matchList.clearSelection()
         
+        # Clear Game information labels
+        self.ui.gameNoLabel.setText("")
+        self.ui.labelDate.setText("")
+        self.ui.whitePlayerLabel.setText("")
+        self.ui.blackPlayerLabel.setText("")
+        
         # Reset chessboard to starting position
         self.chessboard.reset()
         
@@ -177,21 +220,24 @@ class ViewHistory(QDialog):
         # Reset current move index
         self.current_move_index = 0
 
-    # Display csv files on matches folder
     def displayMatches(self):
+        """Display both CSV and PGN files from matches folder"""
         matches_folder = os.path.join(os.getcwd(), "matches")
         if os.path.exists(matches_folder):
             for file_name in os.listdir(matches_folder):
-                if file_name.endswith(".csv"):
-                    self.ui.matchList.addItem(file_name)
+                if file_name.endswith((".csv", ".pgn")):
+                    item = QListWidgetItem(file_name)
+                    # Store file type as user data
+                    item.setData(Qt.ItemDataRole.UserRole, file_name.split('.')[-1])
+                    self.ui.matchList.addItem(item)
 
     def loadMatch(self):
-        """Load and display moves from a CSV file"""
+        """Load and display moves from a CSV or PGN file"""
         fname, _ = QFileDialog.getOpenFileName(
             self,
             "Open File",
             os.path.expanduser("~"),
-            "CSV files (*.csv);;All Files (*)"
+            "Chess Files (*.csv *.pgn);;All Files (*)"
         )
         if fname:
             # Copy file to matches folder if it doesn't exist there
@@ -209,22 +255,27 @@ class ViewHistory(QDialog):
             
             # Add to list and display moves
             item = QListWidgetItem(file_name)
+            item.setData(Qt.ItemDataRole.UserRole, file_name.split('.')[-1])
             self.ui.matchList.addItem(item)
             self.displayMatch(item)
 
     def displayMatch(self, item):
-        """Display moves from selected match"""
+        """Display moves from selected match (CSV or PGN)"""
         if not item:
             return
             
         match_file = item.text()
+        file_type = item.data(Qt.ItemDataRole.UserRole)
         matches_folder = os.path.join(os.getcwd(), "matches")
         match_path = os.path.join(matches_folder, match_file)
         
         if os.path.exists(match_path):
             try:
-                # Load and display moves
-                self.fetch_moves(match_path)
+                if file_type == 'pgn':
+                    self.fetch_moves_from_pgn(match_path)
+                else:  # csv
+                    self.fetch_moves_from_csv(match_path)
+                    
                 self.display_moves_list()
                 
                 # Select first move
@@ -235,7 +286,41 @@ class ViewHistory(QDialog):
             except Exception as e:
                 QMessageBox.warning(self, "Error", f"Failed to load moves: {str(e)}")
 
-    def fetch_moves(self, csv_path):
+    def fetch_moves_from_pgn(self, pgn_path):
+        """Read and process moves from PGN file"""
+        with open(pgn_path) as pgn_file:
+            game = chess.pgn.read_game(pgn_file)
+            if game:
+                # Create DataFrame with moves
+                moves_data = []
+                node = game
+                move_number = 1
+                
+                while node.next():
+                    node = node.next()
+                    san_move = node.san()
+                    is_white = len(moves_data) % 2 == 0
+                    moves_data.append({
+                        'Timestamp': game.headers.get('Date', ''),
+                        'Move': san_move,
+                        'Player': 'White' if is_white else 'Black',
+                        'MoveNumber': f"{move_number}{'.' if is_white else '...'}"
+                    })
+                    if not is_white:
+                        move_number += 1
+                
+                self.moves_df = pd.DataFrame(moves_data)
+                
+                # Update game information labels
+                self.ui.gameNoLabel.setText(game.headers.get('Event', ''))
+                self.ui.labelDate.setText(f"Date: {game.headers.get('Date', '')}")
+                self.ui.whitePlayerLabel.setText(game.headers.get('White', 'White'))
+                self.ui.blackPlayerLabel.setText(game.headers.get('Black', 'Black'))
+                
+                self.chessboard.reset()
+                self.current_move_index = 0
+
+    def fetch_moves_from_csv(self, csv_path):
         """Read and process moves from CSV file"""
         self.moves_df = pd.read_csv(csv_path)
         
@@ -264,11 +349,14 @@ class ViewHistory(QDialog):
         """Display moves in the moves list"""
         self.ui.movesList.clear()
         for index, row in self.moves_df.iterrows():
-            # Format the move display
-            timestamp = row['Timestamp'].split()[1]  # Get only the time part
-            move = row['Move']
-            player = row['Player']
-            move_text = f"{index + 1}. {player}: {move} ({timestamp})"
+            # Format the move display based on file type
+            if 'MoveNumber' in row:  # PGN format
+                move_text = f"{row['MoveNumber']} {row['Move']}"
+            else:  # CSV format
+                timestamp = row['Timestamp'].split()[1]  # Get only the time part
+                move = row['Move']
+                player = row['Player']
+                move_text = f"{index + 1}. {player}: {move} ({timestamp})"
             
             move_item = QListWidgetItem(move_text)
             move_item.setData(Qt.ItemDataRole.UserRole, index)
@@ -290,15 +378,23 @@ class ViewHistory(QDialog):
         self.chessboard.reset()
         for i in range(move_index + 1):
             move = self.moves_df.iloc[i]['Move']
-            # Convert the move format from 'e2-e4' to 'e2e4'
-            from_square, to_square = move.split('-')
-            chess_move = chess.Move.from_uci(from_square + to_square)
-            if chess_move in self.chessboard.legal_moves:
-                self.chessboard.push(chess_move)
-            else:
-                QMessageBox.warning(self, "Error", f"Illegal move detected: {move}")
-                break
-                
+            try:
+                # Handle PGN format moves (already in SAN notation)
+                self.chessboard.push_san(move)
+            except ValueError as e:
+                try:
+                    # Fallback for CSV format ('e2-e4' style)
+                    from_square, to_square = move.split('-')
+                    chess_move = chess.Move.from_uci(from_square + to_square)
+                    if chess_move in self.chessboard.legal_moves:
+                        self.chessboard.push(chess_move)
+                    else:
+                        QMessageBox.warning(self, "Error", f"Illegal move detected: {move}")
+                        break
+                except Exception as e:
+                    QMessageBox.warning(self, "Error", f"Invalid move format: {move}")
+                    break
+                    
         self.renderChessboard()
 
     def renderChessboard(self, initial=False):

@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'ui/chessgame.ui'
+# Form implementation generated from reading ui file 'ui\chessGame.ui'
 #
 # Created by: PyQt6 UI code generator 6.8.0
 #
@@ -9,17 +9,70 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtSvgWidgets import QSvgWidget
 
-
 class Ui_ChessGameWindow(object):
     def setupUi(self, ChessGameWindow):
         ChessGameWindow.setObjectName("ChessGameWindow")
-        ChessGameWindow.resize(1000, 800)
+        ChessGameWindow.resize(1000, 932)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("ui\\../img/app.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         ChessGameWindow.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(parent=ChessGameWindow)
         self.centralwidget.setObjectName("centralwidget")
-        self.mainLayout = QtWidgets.QHBoxLayout(self.centralwidget)
+        self.outerVerticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
+        self.outerVerticalLayout.setObjectName("outerVerticalLayout")
+        self.headerLayout = QtWidgets.QHBoxLayout()
+        self.headerLayout.setObjectName("headerLayout")
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
+        self.headerLayout.addItem(spacerItem)
+        self.gameInfoGroup = QtWidgets.QGroupBox(parent=self.centralwidget)
+        self.gameInfoGroup.setStyleSheet("\n"
+"           QGroupBox {\n"
+"            border: 1px solid #ccc;\n"
+"            border-radius: 5px;\n"
+"            margin-top: 10px;\n"
+"           }\n"
+"           QGroupBox::title {\n"
+"            subcontrol-origin: margin;\n"
+"            left: 10px;\n"
+"            padding: 0 3px;\n"
+"           }\n"
+"         ")
+        self.gameInfoGroup.setObjectName("gameInfoGroup")
+        self.verticalGameInfoLayout = QtWidgets.QVBoxLayout(self.gameInfoGroup)
+        self.verticalGameInfoLayout.setObjectName("verticalGameInfoLayout")
+        self.gameInfoLayout = QtWidgets.QHBoxLayout()
+        self.gameInfoLayout.setObjectName("gameInfoLayout")
+        self.gameNameLabel = QtWidgets.QLabel(parent=self.gameInfoGroup)
+        self.gameNameLabel.setStyleSheet("\n"
+"                font-weight: bold;\n"
+"                font-size: 14px;\n"
+"                padding: 5px;\n"
+"              ")
+        self.gameNameLabel.setObjectName("gameNameLabel")
+        self.gameInfoLayout.addWidget(self.gameNameLabel)
+        self.roundLabel = QtWidgets.QLabel(parent=self.gameInfoGroup)
+        self.roundLabel.setStyleSheet("\n"
+"                font-weight: bold;\n"
+"                font-size: 14px;\n"
+"                padding: 5px;\n"
+"              ")
+        self.roundLabel.setObjectName("roundLabel")
+        self.gameInfoLayout.addWidget(self.roundLabel)
+        self.verticalGameInfoLayout.addLayout(self.gameInfoLayout)
+        self.siteLabel = QtWidgets.QLabel(parent=self.gameInfoGroup)
+        self.siteLabel.setStyleSheet("\n"
+"              font-size: 12px;\n"
+"              padding: 2px;\n"
+"              color: #666;\n"
+"            ")
+        self.siteLabel.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.siteLabel.setObjectName("siteLabel")
+        self.verticalGameInfoLayout.addWidget(self.siteLabel)
+        self.headerLayout.addWidget(self.gameInfoGroup)
+        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
+        self.headerLayout.addItem(spacerItem1)
+        self.outerVerticalLayout.addLayout(self.headerLayout)
+        self.mainLayout = QtWidgets.QHBoxLayout()
         self.mainLayout.setObjectName("mainLayout")
         self.leftLayout = QtWidgets.QVBoxLayout()
         self.leftLayout.setObjectName("leftLayout")
@@ -43,24 +96,24 @@ class Ui_ChessGameWindow(object):
         self.player1Layout.setObjectName("player1Layout")
         self.player1Name = QtWidgets.QLineEdit(parent=self.player1Group)
         self.player1Name.setStyleSheet("\n"
-"              padding: 5px;\n"
-"              font-size: 14px;\n"
-"              background: #f8f8f8;\n"
-"              border: 1px solid #ddd;\n"
-"              color: #333;\n"
-"             ")
+"                padding: 5px;\n"
+"                font-size: 14px;\n"
+"                background: #f8f8f8;\n"
+"                border: 1px solid #ddd;\n"
+"                color: #333;\n"
+"               ")
         self.player1Name.setReadOnly(True)
         self.player1Name.setObjectName("player1Name")
         self.player1Layout.addWidget(self.player1Name)
         self.player1listView = QtWidgets.QListView(parent=self.player1Group)
         self.player1listView.setStyleSheet("\n"
-"              QListView {\n"
-"               background: #f8f8f8;\n"
-"               border: 1px solid #ddd;\n"
-"               border-radius: 5px;\n"
-"               padding: 5px;\n"
-"              }\n"
-"             ")
+"                QListView {\n"
+"                 background: #f8f8f8;\n"
+"                 border: 1px solid #ddd;\n"
+"                 border-radius: 5px;\n"
+"                 padding: 5px;\n"
+"                }\n"
+"               ")
         self.player1listView.setObjectName("player1listView")
         self.player1Layout.addWidget(self.player1listView)
         self.rightLayout.addWidget(self.player1Group)
@@ -70,44 +123,45 @@ class Ui_ChessGameWindow(object):
         self.player2Layout.setObjectName("player2Layout")
         self.player2Name = QtWidgets.QLineEdit(parent=self.player2Group)
         self.player2Name.setStyleSheet("\n"
-"              padding: 5px;\n"
-"              font-size: 14px;\n"
-"              background: #f8f8f8;\n"
-"              border: 1px solid #ddd;\n"
-"              color: #333;\n"
-"             ")
+"                padding: 5px;\n"
+"                font-size: 14px;\n"
+"                background: #f8f8f8;\n"
+"                border: 1px solid #ddd;\n"
+"                color: #333;\n"
+"               ")
         self.player2Name.setReadOnly(True)
         self.player2Name.setObjectName("player2Name")
         self.player2Layout.addWidget(self.player2Name)
         self.player2listView = QtWidgets.QListView(parent=self.player2Group)
         self.player2listView.setStyleSheet("\n"
-"              QListView {\n"
-"               background: #f8f8f8;\n"
-"               border: 1px solid #ddd;\n"
-"               border-radius: 5px;\n"
-"               padding: 5px;\n"
-"              }\n"
-"             ")
+"                QListView {\n"
+"                 background: #f8f8f8;\n"
+"                 border: 1px solid #ddd;\n"
+"                 border-radius: 5px;\n"
+"                 padding: 5px;\n"
+"                }\n"
+"               ")
         self.player2listView.setObjectName("player2listView")
         self.player2Layout.addWidget(self.player2listView)
         self.rightLayout.addWidget(self.player2Group)
         self.endButton = QtWidgets.QPushButton(parent=self.centralwidget)
         self.endButton.setStyleSheet("\n"
-"           QPushButton {\n"
-"            background: #d9534f;\n"
-"            color: white;\n"
-"            border: none;\n"
-"            padding: 8px 16px;\n"
-"            border-radius: 4px;\n"
-"            font-weight: bold;\n"
-"           }\n"
-"           QPushButton:hover {\n"
-"            background: #c9302c;\n"
-"           }\n"
-"          ")
+"             QPushButton {\n"
+"              background: #d9534f;\n"
+"              color: white;\n"
+"              border: none;\n"
+"              padding: 8px 16px;\n"
+"              border-radius: 4px;\n"
+"              font-weight: bold;\n"
+"             }\n"
+"             QPushButton:hover {\n"
+"              background: #c9302c;\n"
+"             }\n"
+"            ")
         self.endButton.setObjectName("endButton")
         self.rightLayout.addWidget(self.endButton)
         self.mainLayout.addLayout(self.rightLayout)
+        self.outerVerticalLayout.addLayout(self.mainLayout)
         ChessGameWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(ChessGameWindow)
@@ -116,7 +170,10 @@ class Ui_ChessGameWindow(object):
     def retranslateUi(self, ChessGameWindow):
         _translate = QtCore.QCoreApplication.translate
         ChessGameWindow.setWindowTitle(_translate("ChessGameWindow", "Chess Game"))
+        self.gameInfoGroup.setTitle(_translate("ChessGameWindow", "Game Information"))
+        self.gameNameLabel.setText(_translate("ChessGameWindow", "Game: "))
+        self.roundLabel.setText(_translate("ChessGameWindow", "Round: "))
+        self.siteLabel.setText(_translate("ChessGameWindow", "Site: "))
         self.player1Group.setTitle(_translate("ChessGameWindow", "White Player"))
         self.player2Group.setTitle(_translate("ChessGameWindow", "Black Player"))
         self.endButton.setText(_translate("ChessGameWindow", "End Game"))
-

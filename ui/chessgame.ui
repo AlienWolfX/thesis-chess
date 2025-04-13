@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>800</height>
+    <height>932</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,138 +18,244 @@
     <normaloff>../img/app.ico</normaloff>../img/app.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="mainLayout">
+   <layout class="QVBoxLayout" name="outerVerticalLayout">
     <item>
-     <layout class="QVBoxLayout" name="leftLayout">
+     <layout class="QHBoxLayout" name="headerLayout">
       <item>
-       <widget class="QSvgWidget" name="chessboard" native="true">
-        <property name="minimumSize">
+       <spacer name="horizontalSpacerLeft">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
          <size>
-          <width>500</width>
-          <height>500</height>
+          <width>40</width>
+          <height>20</height>
          </size>
         </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="gameInfoGroup">
         <property name="styleSheet">
-         <string notr="true">border: 2px solid #333; background: white;</string>
+         <string notr="true">
+           QGroupBox {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 10px;
+           }
+           QGroupBox::title {
+            subcontrol-origin: margin;
+            left: 10px;
+            padding: 0 3px;
+           }
+         </string>
         </property>
+        <property name="title">
+         <string>Game Information</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalGameInfoLayout">
+         <item>
+          <layout class="QHBoxLayout" name="gameInfoLayout">
+           <item>
+            <widget class="QLabel" name="gameNameLabel">
+             <property name="styleSheet">
+              <string notr="true">
+                font-weight: bold;
+                font-size: 14px;
+                padding: 5px;
+              </string>
+             </property>
+             <property name="text">
+              <string>Game: </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="roundLabel">
+             <property name="styleSheet">
+              <string notr="true">
+                font-weight: bold;
+                font-size: 14px;
+                padding: 5px;
+              </string>
+             </property>
+             <property name="text">
+              <string>Round: </string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QLabel" name="siteLabel">
+           <property name="styleSheet">
+            <string notr="true">
+              font-size: 12px;
+              padding: 2px;
+              color: #666;
+            </string>
+           </property>
+           <property name="text">
+            <string>Site: </string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="appIcon">
-        <property name="styleSheet">
-         <string notr="true">padding: 20px;</string>
+       <spacer name="horizontalSpacerRight">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-        <property name="pixmap">
-         <pixmap>../img/rookeye.ph.png</pixmap>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
         </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
+       </spacer>
       </item>
      </layout>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="rightLayout">
+     <layout class="QHBoxLayout" name="mainLayout">
       <item>
-       <widget class="QGroupBox" name="player1Group">
-        <property name="title">
-         <string>White Player</string>
-        </property>
-        <layout class="QVBoxLayout" name="player1Layout">
-         <item>
-          <widget class="QLineEdit" name="player1Name">
-           <property name="styleSheet">
-            <string notr="true">
-              padding: 5px;
-              font-size: 14px;
-              background: #f8f8f8;
-              border: 1px solid #ddd;
-              color: #333;
-             </string>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QListView" name="player1listView">
-           <property name="styleSheet">
-            <string notr="true">
-              QListView {
-               background: #f8f8f8;
-               border: 1px solid #ddd;
-               border-radius: 5px;
-               padding: 5px;
-              }
-             </string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
+       <layout class="QVBoxLayout" name="leftLayout">
+        <item>
+         <widget class="QSvgWidget" name="chessboard" native="true">
+          <property name="minimumSize">
+           <size>
+            <width>500</width>
+            <height>500</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">border: 2px solid #333; background: white;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="appIcon">
+          <property name="styleSheet">
+           <string notr="true">padding: 20px;</string>
+          </property>
+          <property name="pixmap">
+           <pixmap>../img/rookeye.ph.png</pixmap>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QGroupBox" name="player2Group">
-        <property name="title">
-         <string>Black Player</string>
-        </property>
-        <layout class="QVBoxLayout" name="player2Layout">
-         <item>
-          <widget class="QLineEdit" name="player2Name">
-           <property name="styleSheet">
-            <string notr="true">
-              padding: 5px;
-              font-size: 14px;
-              background: #f8f8f8;
-              border: 1px solid #ddd;
-              color: #333;
-             </string>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QListView" name="player2listView">
-           <property name="styleSheet">
-            <string notr="true">
-              QListView {
-               background: #f8f8f8;
-               border: 1px solid #ddd;
-               border-radius: 5px;
-               padding: 5px;
-              }
-             </string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="endButton">
-        <property name="styleSheet">
-         <string notr="true">
-           QPushButton {
-            background: #d9534f;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-weight: bold;
-           }
-           QPushButton:hover {
-            background: #c9302c;
-           }
-          </string>
-        </property>
-        <property name="text">
-         <string>End Game</string>
-        </property>
-       </widget>
+       <layout class="QVBoxLayout" name="rightLayout">
+        <item>
+         <widget class="QGroupBox" name="player1Group">
+          <property name="title">
+           <string>White Player</string>
+          </property>
+          <layout class="QVBoxLayout" name="player1Layout">
+           <item>
+            <widget class="QLineEdit" name="player1Name">
+             <property name="styleSheet">
+              <string notr="true">
+                padding: 5px;
+                font-size: 14px;
+                background: #f8f8f8;
+                border: 1px solid #ddd;
+                color: #333;
+               </string>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QListView" name="player1listView">
+             <property name="styleSheet">
+              <string notr="true">
+                QListView {
+                 background: #f8f8f8;
+                 border: 1px solid #ddd;
+                 border-radius: 5px;
+                 padding: 5px;
+                }
+               </string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="player2Group">
+          <property name="title">
+           <string>Black Player</string>
+          </property>
+          <layout class="QVBoxLayout" name="player2Layout">
+           <item>
+            <widget class="QLineEdit" name="player2Name">
+             <property name="styleSheet">
+              <string notr="true">
+                padding: 5px;
+                font-size: 14px;
+                background: #f8f8f8;
+                border: 1px solid #ddd;
+                color: #333;
+               </string>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QListView" name="player2listView">
+             <property name="styleSheet">
+              <string notr="true">
+                QListView {
+                 background: #f8f8f8;
+                 border: 1px solid #ddd;
+                 border-radius: 5px;
+                 padding: 5px;
+                }
+               </string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="endButton">
+          <property name="styleSheet">
+           <string notr="true">
+             QPushButton {
+              background: #d9534f;
+              color: white;
+              border: none;
+              padding: 8px 16px;
+              border-radius: 4px;
+              font-weight: bold;
+             }
+             QPushButton:hover {
+              background: #c9302c;
+             }
+            </string>
+          </property>
+          <property name="text">
+           <string>End Game</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
