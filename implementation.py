@@ -17,7 +17,7 @@ import chess.pgn
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 #### SETTINGS ####
-model = YOLO('model/v27.pt').to(device)
+model = YOLO('model/v29.pt').to(device)
 # Initialize the webcam
 # cameraSrc = "https://192.168..207:8080/video" # IP Camera URL
 cameraSrc = 0  # Laptop Webcam
