@@ -1,5 +1,5 @@
 """
-The main file for the project.
+GUI for the project.
 """
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QDialog, QFileDialog, QListWidgetItem, QMessageBox
@@ -7,6 +7,7 @@ from PyQt6.QtCore import Qt
 from forms.mainWindow import Ui_MainWindow
 from forms.newGame import Ui_newGame
 from forms.viewHistory import Ui_viewHistory
+from forms.chessGame import Ui_ChessGameWindow
 from forms.about import Ui_about
 import cv2 as cv
 import chess
@@ -49,7 +50,6 @@ class MainWindow(QMainWindow):
 class ChessGameWindow(QMainWindow):
     def __init__(self, game_details, parent=None):
         super().__init__(parent)
-        from forms.chessGame import Ui_ChessGameWindow
         self.ui = Ui_ChessGameWindow()
         self.ui.setupUi(self)
         

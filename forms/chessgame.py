@@ -69,7 +69,32 @@ class Ui_ChessGameWindow(object):
         self.siteLabel.setObjectName("siteLabel")
         self.verticalGameInfoLayout.addWidget(self.siteLabel)
         self.headerLayout.addWidget(self.gameInfoGroup)
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
+        self.statusIndicatorsLayout = QtWidgets.QVBoxLayout()
+        self.statusIndicatorsLayout.setObjectName("statusIndicatorsLayout")
+        self.chessboardStatusIndicator = QtWidgets.QLabel(parent=self.centralwidget)
+        self.chessboardStatusIndicator.setStyleSheet("\n"
+"            background-color: #4CAF50;  /* Green color */\n"
+"            border-radius: 5px;\n"
+"            min-width: 10px;\n"
+"            min-height: 10px;\n"
+"            max-width: 10px;\n"
+"            max-height: 10px;\n"
+"           ")
+        self.chessboardStatusIndicator.setObjectName("chessboardStatusIndicator")
+        self.statusIndicatorsLayout.addWidget(self.chessboardStatusIndicator)
+        self.gameStatusIndicator = QtWidgets.QLabel(parent=self.centralwidget)
+        self.gameStatusIndicator.setStyleSheet("\n"
+"            background-color: #FFC107;  /* Yellow color */\n"
+"            border-radius: 5px;\n"
+"            min-width: 10px;\n"
+"            min-height: 10px;\n"
+"            max-width: 10px;\n"
+"            max-height: 10px;\n"
+"           ")
+        self.gameStatusIndicator.setObjectName("gameStatusIndicator")
+        self.statusIndicatorsLayout.addWidget(self.gameStatusIndicator)
+        self.headerLayout.addLayout(self.statusIndicatorsLayout)
+        spacerItem1 = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
         self.headerLayout.addItem(spacerItem1)
         self.outerVerticalLayout.addLayout(self.headerLayout)
         self.mainLayout = QtWidgets.QHBoxLayout()
@@ -174,6 +199,8 @@ class Ui_ChessGameWindow(object):
         self.gameNameLabel.setText(_translate("ChessGameWindow", "Game: "))
         self.roundLabel.setText(_translate("ChessGameWindow", "Round: "))
         self.siteLabel.setText(_translate("ChessGameWindow", "Site: "))
+        self.chessboardStatusIndicator.setToolTip(_translate("ChessGameWindow", "Chessboard Connection"))
+        self.gameStatusIndicator.setToolTip(_translate("ChessGameWindow", "Game Status"))
         self.player1Group.setTitle(_translate("ChessGameWindow", "White Player"))
         self.player2Group.setTitle(_translate("ChessGameWindow", "Black Player"))
         self.endButton.setText(_translate("ChessGameWindow", "End Game"))
