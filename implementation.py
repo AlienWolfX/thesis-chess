@@ -16,14 +16,14 @@ import chess.pgn
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 #### SETTINGS ####
-model = YOLO('model/v29.pt').to(device)
-cameraSrc = 0 
+model = YOLO('model/v27.pt').to(device)
+cameraSrc = 1 
 cap = cv2.VideoCapture(cameraSrc)
 frame_skip = 2 
 frame_count = 0
 
 CONFIDENCE_THRESHOLD = 0.40  # Global confidence threshold for detections
-BUFFER_SIZE = 10  # Number of frames to keep in buffer
+BUFFER_SIZE = 8  # Number of frames to keep in buffer
 CONSENSUS_THRESHOLD = 0.4  # 40% agreement threshold for stable state detection
 USE_CENTER_POINT = False
 SHOW_LIVE_WINDOW = True 
@@ -415,7 +415,8 @@ while True:
             
         # Position the board window
         cv2.namedWindow('Chess Board', cv2.WINDOW_NORMAL)
-        cv2.moveWindow('Chess Board', 200, 200)
+        cv2.resizeWindow('Chess Board', 800, 800)
+        cv2.moveWindow('Chess Board', 600, 0)
         cv2.imshow('Chess Board', board_vis)
         
         # Only process visualization if live window is enabled

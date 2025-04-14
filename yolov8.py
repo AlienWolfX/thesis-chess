@@ -9,7 +9,7 @@ model = YOLO('model/v28.pt').to(device)
 
 # Initialize the webcam ip or usb
 # cameraSrc = "http://192.168.0.100:8080/video" # IP Camera URL
-cameraSrc = 0 # Laptop Webcam
+cameraSrc = 1 # Laptop Webcam
 
 cap = cv2.VideoCapture(cameraSrc)
 
