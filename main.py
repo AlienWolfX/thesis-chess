@@ -1,21 +1,20 @@
 """
-The main file for the project.
+GUI for the project.
 """
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QDialog, QFileDialog, QListWidgetItem, QMessageBox
-from PyQt6.QtSvg import QSvgRenderer
-from PyQt6.QtGui import QPixmap, QImage, QPainter
 from PyQt6.QtCore import Qt
 from forms.mainWindow import Ui_MainWindow
 from forms.newGame import Ui_newGame
 from forms.viewHistory import Ui_viewHistory
+from forms.chessGame import Ui_ChessGameWindow
 from forms.about import Ui_about
 import cv2 as cv
 import chess
-import chess.svg
-import chess.pgn
 import os
 import pandas as pd
+from utils.view_history_utils import render_chessboard, load_pgn_moves, load_csv_moves
+from utils.validation_utils import validate_alphanumeric, validate_alphanumeric_with_spaces, validate_numeric
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -37,7 +36,6 @@ class MainWindow(QMainWindow):
                 print(f"Round: {game_details['round']}")
                 print(f"Site: {game_details['site']}")
                 
-                # Open the ChessGameWindow and pass the game details
                 self.chessGameWindow = ChessGameWindow(game_details)
                 self.chessGameWindow.show()
         
@@ -52,7 +50,6 @@ class MainWindow(QMainWindow):
 class ChessGameWindow(QMainWindow):
     def __init__(self, game_details, parent=None):
         super().__init__(parent)
-        from forms.chessGame import Ui_ChessGameWindow
         self.ui = Ui_ChessGameWindow()
         self.ui.setupUi(self)
         
@@ -87,37 +84,68 @@ class NewGame(QDialog):
             'site': '' 
         }
         
+        # Populate camera combo box
+        self.populate_cameras()
+        
         # Connect buttons and validation
         self.ui.proceedButton.clicked.connect(self.validateAndSave)
         self.ui.gameNameEdit.textChanged.connect(self.validateGameName)
         self.ui.whitePlayerEdit.textChanged.connect(self.validatePlayerName)
         self.ui.blackPlayerEdit.textChanged.connect(self.validatePlayerName)
         self.ui.roundEdit.textChanged.connect(self.validateRound)
-        self.ui.siteEdit.textChanged.connect(self.validateSite) 
+        self.ui.siteEdit.textChanged.connect(self.validateSite)
+
+    def populate_cameras(self):
+        """Detect and populate available cameras"""
+        self.ui.cameraComboBox.clear()
+        
+        # Test cameras from index 0 to 99
+        for i in range(100):
+            cap = cv.VideoCapture(i, cv.CAP_DSHOW)  # Use DirectShow on Windows
+            if cap.isOpened():
+                # Get camera info
+                ret, frame = cap.read()
+                if ret:
+                    # Get camera resolution
+                    width = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
+                    height = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
+                    camera_text = f"Camera {i} ({width}x{height})"
+                else:
+                    camera_text = f"Camera {i}"
+                    
+                self.ui.cameraComboBox.addItem(camera_text, i)
+                cap.release()
+            else:
+                # No more cameras found, break the loop
+                break
+        
+        # Select first camera by default if available
+        if self.ui.cameraComboBox.count() > 0:
+            self.ui.cameraComboBox.setCurrentIndex(0)
 
     def validateGameName(self):
         """Validate game name to allow alphanumeric characters"""
         game_name = self.ui.gameNameEdit.text()
-        if not game_name.isalnum() and game_name != '':
+        if not validate_alphanumeric(game_name):
             self.ui.gameNameEdit.setText(game_name[:-1])
 
     def validatePlayerName(self):
         """Validate player names to allow alphanumeric characters and spaces"""
         for edit in [self.ui.whitePlayerEdit, self.ui.blackPlayerEdit]:
             player_name = edit.text()
-            if not all(c.isalnum() or c.isspace() for c in player_name) and player_name != '':
+            if not validate_alphanumeric_with_spaces(player_name):
                 edit.setText(player_name[:-1])
 
     def validateRound(self):
         """Validate round to only allow integers"""
         round_text = self.ui.roundEdit.text()
-        if not round_text.isdigit() and round_text != '':
+        if not validate_numeric(round_text):
             self.ui.roundEdit.setText(round_text[:-1])
 
     def validateSite(self):
         """Validate site to allow alphanumeric characters and spaces"""
         site = self.ui.siteEdit.text()
-        if not all(c.isalnum() or c.isspace() for c in site) and site != '':
+        if not validate_alphanumeric_with_spaces(site):
             self.ui.siteEdit.setText(site[:-1])
 
     def validateAndSave(self):
@@ -126,7 +154,7 @@ class NewGame(QDialog):
         white_player = self.ui.whitePlayerEdit.text()
         black_player = self.ui.blackPlayerEdit.text()
         round_number = self.ui.roundEdit.text()
-        site = self.ui.siteEdit.text()  # Add site field
+        site = self.ui.siteEdit.text()
 
         # Check if fields are empty
         if not all([game_name, white_player, black_player, round_number, site]):  # Include site
@@ -288,59 +316,28 @@ class ViewHistory(QDialog):
 
     def fetch_moves_from_pgn(self, pgn_path):
         """Read and process moves from PGN file"""
-        with open(pgn_path) as pgn_file:
-            game = chess.pgn.read_game(pgn_file)
-            if game:
-                # Create DataFrame with moves
-                moves_data = []
-                node = game
-                move_number = 1
-                
-                while node.next():
-                    node = node.next()
-                    san_move = node.san()
-                    is_white = len(moves_data) % 2 == 0
-                    moves_data.append({
-                        'Timestamp': game.headers.get('Date', ''),
-                        'Move': san_move,
-                        'Player': 'White' if is_white else 'Black',
-                        'MoveNumber': f"{move_number}{'.' if is_white else '...'}"
-                    })
-                    if not is_white:
-                        move_number += 1
-                
-                self.moves_df = pd.DataFrame(moves_data)
-                
-                # Update game information labels
-                self.ui.gameNoLabel.setText(game.headers.get('Event', ''))
-                self.ui.labelDate.setText(f"Date: {game.headers.get('Date', '')}")
-                self.ui.whitePlayerLabel.setText(game.headers.get('White', 'White'))
-                self.ui.blackPlayerLabel.setText(game.headers.get('Black', 'Black'))
-                
-                self.chessboard.reset()
-                self.current_move_index = 0
+        moves_df, headers = load_pgn_moves(pgn_path)
+        if moves_df is not None:
+            self.moves_df = moves_df
+            
+            # Update game information labels
+            self.ui.gameNoLabel.setText(headers.get('Event', ''))
+            self.ui.labelDate.setText(f"Date: {headers.get('Date', '')}")
+            self.ui.whitePlayerLabel.setText(headers.get('White', 'White'))
+            self.ui.blackPlayerLabel.setText(headers.get('Black', 'Black'))
+            
+            self.chessboard.reset()
+            self.current_move_index = 0
 
     def fetch_moves_from_csv(self, csv_path):
         """Read and process moves from CSV file"""
-        self.moves_df = pd.read_csv(csv_path)
+        self.moves_df, headers = load_csv_moves(csv_path)
         
-        # Update game information
-        if len(self.moves_df) > 0:
-            first_move = self.moves_df.iloc[0]
-            last_move = self.moves_df.iloc[-1]
-            
-            # Update game information labels
-            self.ui.gameNoLabel.setText(os.path.splitext(os.path.basename(csv_path))[0])
-            self.ui.labelDate.setText(f"Date: {first_move['Timestamp'].split()[0]}")
-            
-            # Track players based on their moves
-            white_moves = self.moves_df[self.moves_df['Player'] == 'White']
-            black_moves = self.moves_df[self.moves_df['Player'] == 'Black']
-            
-            if not white_moves.empty:
-                self.ui.whitePlayerLabel.setText("White")
-            if not black_moves.empty:
-                self.ui.blackPlayerLabel.setText("Black")
+        # Update game information labels
+        self.ui.gameNoLabel.setText(headers.get('Event', ''))
+        self.ui.labelDate.setText(f"Date: {headers.get('Date', '')}")
+        self.ui.whitePlayerLabel.setText(headers.get('White', 'White'))
+        self.ui.blackPlayerLabel.setText(headers.get('Black', 'Black'))
         
         self.chessboard.reset()
         self.current_move_index = 0
@@ -398,33 +395,8 @@ class ViewHistory(QDialog):
         self.renderChessboard()
 
     def renderChessboard(self, initial=False):
-        # Create board with fixed size for both initial and move displays
-        board_size = {'size': self.board_size}
-        
-        if initial:
-            chessboard_svg = chess.svg.board(self.chessboard, **board_size).encode("UTF-8")
-        else:
-            last_move = self.chessboard.peek() if self.chessboard.move_stack else None
-            arrows = []
-            if last_move:
-                arrows.append(chess.svg.Arrow(last_move.from_square, last_move.to_square, color='red'))
-            chessboard_svg = chess.svg.board(self.chessboard, arrows=arrows, **board_size).encode("UTF-8")
-
-        # Create renderer with fixed size
-        svg_renderer = QSvgRenderer(chessboard_svg)
-        
-        # Create image with board size
-        image = QImage(self.board_size, self.board_size, QImage.Format.Format_ARGB32)
-        image.fill(0x00ffffff)
-        painter = QPainter(image)
-        svg_renderer.render(painter)
-        painter.end()
-        
-        # Set pixmap directly at board size
-        pixmap = QPixmap.fromImage(image)
+        pixmap = render_chessboard(self.chessboard, self.board_size, initial)
         self.ui.chessOutput.setPixmap(pixmap)
-        
-        # Ensure dialog size accommodates the board
         self.adjustSize()
 
 class About(QDialog):

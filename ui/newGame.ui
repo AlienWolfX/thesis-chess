@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>450</width>
-    <height>350</height>
+    <height>400</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>400</width>
-    <height>300</height>
+    <height>350</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -112,6 +112,23 @@
        <widget class="QLineEdit" name="blackPlayerEdit">
         <property name="placeholderText">
          <string>Enter black player name</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>Camera:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QComboBox" name="cameraComboBox">
+        <property name="placeholderText" stdset="0">
+         <string>Select camera</string>
         </property>
        </widget>
       </item>

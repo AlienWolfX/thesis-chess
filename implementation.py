@@ -1,7 +1,6 @@
 import cv2
 import torch
 from ultralytics import YOLO
-import time
 from utils.chessFunctions import create_board_display
 import numpy as np
 from collections import deque
@@ -13,20 +12,22 @@ from datetime import datetime
 import os
 import chess
 import chess.pgn
+import chess.svg
+import cairosvg
+import io
+from PIL import Image
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 #### SETTINGS ####
 model = YOLO('model/v27.pt').to(device)
-# Initialize the webcam
-# cameraSrc = "https://192.168..207:8080/video" # IP Camera URL
-cameraSrc = 0  # Laptop Webcam
+cameraSrc = 0 
 cap = cv2.VideoCapture(cameraSrc)
 frame_skip = 2 
 frame_count = 0
 
 CONFIDENCE_THRESHOLD = 0.40  # Global confidence threshold for detections
-BUFFER_SIZE = 10  # Number of frames to keep in buffer
+BUFFER_SIZE = 8  # Number of frames to keep in buffer
 CONSENSUS_THRESHOLD = 0.4  # 40% agreement threshold for stable state detection
 USE_CENTER_POINT = False
 SHOW_LIVE_WINDOW = True 
@@ -115,13 +116,15 @@ class ChessStateBuffer:
         return False
 
 def get_piece_point(x1: int, y1: int, x2: int, y2: int) -> tuple:
-    """Get the reference point for a piece based on global setting."""
+    """Get the reference point for a piece using middle point between center and bottom."""
     center_x = (x1 + x2) // 2
-    if USE_CENTER_POINT:
-        center_y = (y1 + y2) // 2  # Use center point
-    else:
-        center_y = y2  # Use bottom point
-    return (center_x, center_y)
+    center_y = (y1 + y2) // 2
+    bottom_y = y2
+    
+    # Use midpoint between center and bottom
+    piece_y = (center_y + bottom_y) // 2
+    
+    return (center_x, piece_y)
 
 def calibrate_board(results):
     piece_positions = {'white_rooks': [], 'black_rooks': []}
@@ -274,9 +277,50 @@ def track_pieces(results):
     
     return current_positions
 
+def is_reachable_state(old_state: Dict[str, str], new_state: Dict[str, str], max_moves: int = 2) -> bool:
+    """
+    Check if new_state is reachable from old_state within max_moves moves.
+    Returns True if reachable, False otherwise.
+    """
+    if old_state is None:
+        return True  # First state is always valid
+        
+    # Create board from old state
+    old_board = chess.Board()
+    old_board.clear()
+    for square, piece in old_state.items():
+        square_idx = chess.parse_square(square)
+        piece_obj = chess.Piece.from_symbol(piece)
+        old_board.set_piece_at(square_idx, piece_obj)
+    
+    # Create board from new state
+    new_board = chess.Board()
+    new_board.clear()
+    for square, piece in new_state.items():
+        square_idx = chess.parse_square(square)
+        piece_obj = chess.Piece.from_symbol(piece)
+        new_board.set_piece_at(square_idx, piece_obj)
+    
+    # Count differences between boards
+    differences = 0
+    for square in chess.SQUARES:
+        old_piece = old_board.piece_at(square)
+        new_piece = new_board.piece_at(square)
+        if old_piece != new_piece:
+            differences += 1
+    
+    # Each move changes at most 2 squares (from and to)
+    # So max_moves * 2 is the maximum number of squares that can change
+    return differences <= (max_moves * 2)
+
 def save_move_to_csv_and_pgn(old_state: Dict[str, str], new_state: Dict[str, str], pgn_recorder: PGNRecorder) -> None:
     """Compare two board states and store the detected move."""
     if old_state is None:
+        return
+        
+    # Check if the new state is reachable
+    if not is_reachable_state(old_state, new_state):
+        print("Warning: New board state is not reachable within 2 moves - ignoring")
         return
         
     # Find differences between states
@@ -361,6 +405,33 @@ def finalize_game(pgn_recorder: PGNRecorder, result: str = "*") -> None:
     except Exception as e:
         print(f"Error saving files: {e}")
 
+def create_board_display_svg(board_state):
+    """Create an SVG-based chess board visualization"""
+    # Create a new chess board
+    board = chess.Board()
+    board.clear()  # Clear all pieces
+    
+    # Place pieces according to current state
+    for square, piece in board_state.items():
+        # Convert square name to chess.Square index
+        square_idx = chess.parse_square(square)
+        # Convert piece symbol to chess.Piece
+        piece_obj = chess.Piece.from_symbol(piece)
+        # Set piece on board
+        board.set_piece_at(square_idx, piece_obj)
+    
+    # Generate SVG
+    svg_content = chess.svg.board(board=board, size=800)
+    
+    # Convert SVG to PNG using cairosvg
+    png_data = cairosvg.svg2png(bytestring=svg_content.encode('utf-8'))
+    
+    # Convert PNG to numpy array for OpenCV display
+    image = Image.open(io.BytesIO(png_data))
+    opencv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGBA2BGR)
+    
+    return opencv_image
+
 # Main loop
 state_buffer = ChessStateBuffer(BUFFER_SIZE, CONSENSUS_THRESHOLD)
 calibrated = False
@@ -412,13 +483,14 @@ while True:
             last_stable_state = stable_state.copy()
             
         if state_buffer.current_stable_state:
-            board_vis = create_board_display(state_buffer.current_stable_state)
+            board_vis = create_board_display_svg(state_buffer.current_stable_state)
         else:
-            board_vis = create_board_display(current_positions)
+            board_vis = create_board_display_svg(current_positions)
             
         # Position the board window
         cv2.namedWindow('Chess Board', cv2.WINDOW_NORMAL)
-        cv2.moveWindow('Chess Board', 200, 200)
+        cv2.resizeWindow('Chess Board', 800, 800)
+        cv2.moveWindow('Chess Board', 600, 0)
         cv2.imshow('Chess Board', board_vis)
         
         # Only process visualization if live window is enabled
@@ -432,11 +504,13 @@ while True:
                     x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
                     piece_label = model.names[int(box.cls)]
                     piece_point = get_piece_point(x1, y1, x2, y2)
+                    confidence = float(box.conf[0])
                     
-                    # Draw bounding box and label
+                    # Draw bounding box and label with confidence
                     cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), (255, 255, 255), 1)
-                    cv2.putText(annotated_frame, piece_label, (x1, y1 - 5), 
-                               cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 0, 0), 1)
+                    label_text = f"{piece_label} ({confidence:.2f})"
+                    cv2.putText(annotated_frame, label_text, (x1, y1 - 5), 
+                               cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
                     
                     # Find closest square
                     closest_square = None
