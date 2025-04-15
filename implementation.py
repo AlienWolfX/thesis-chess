@@ -20,7 +20,7 @@ from PIL import Image
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 #### SETTINGS ####
-model = YOLO('model/50_epoch_batch_64_with_synthetic_data.pt').to(device)
+model = YOLO('model/v27.pt').to(device)
 cameraSrc = 0 
 cap = cv2.VideoCapture(cameraSrc)
 frame_skip = 2 
@@ -116,13 +116,15 @@ class ChessStateBuffer:
         return False
 
 def get_piece_point(x1: int, y1: int, x2: int, y2: int) -> tuple:
-    """Get the reference point for a piece based on global setting."""
+    """Get the reference point for a piece using middle point between center and bottom."""
     center_x = (x1 + x2) // 2
-    if USE_CENTER_POINT:
-        center_y = (y1 + y2) // 2  # Use center point
-    else:
-        center_y = y2  # Use bottom point
-    return (center_x, center_y)
+    center_y = (y1 + y2) // 2
+    bottom_y = y2
+    
+    # Use midpoint between center and bottom
+    piece_y = (center_y + bottom_y) // 2
+    
+    return (center_x, piece_y)
 
 def calibrate_board(results):
     piece_positions = {'white_rooks': [], 'black_rooks': []}

@@ -84,13 +84,44 @@ class NewGame(QDialog):
             'site': '' 
         }
         
+        # Populate camera combo box
+        self.populate_cameras()
+        
         # Connect buttons and validation
         self.ui.proceedButton.clicked.connect(self.validateAndSave)
         self.ui.gameNameEdit.textChanged.connect(self.validateGameName)
         self.ui.whitePlayerEdit.textChanged.connect(self.validatePlayerName)
         self.ui.blackPlayerEdit.textChanged.connect(self.validatePlayerName)
         self.ui.roundEdit.textChanged.connect(self.validateRound)
-        self.ui.siteEdit.textChanged.connect(self.validateSite) 
+        self.ui.siteEdit.textChanged.connect(self.validateSite)
+
+    def populate_cameras(self):
+        """Detect and populate available cameras"""
+        self.ui.cameraComboBox.clear()
+        
+        # Test cameras from index 0 to 99
+        for i in range(100):
+            cap = cv.VideoCapture(i, cv.CAP_DSHOW)  # Use DirectShow on Windows
+            if cap.isOpened():
+                # Get camera info
+                ret, frame = cap.read()
+                if ret:
+                    # Get camera resolution
+                    width = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
+                    height = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
+                    camera_text = f"Camera {i} ({width}x{height})"
+                else:
+                    camera_text = f"Camera {i}"
+                    
+                self.ui.cameraComboBox.addItem(camera_text, i)
+                cap.release()
+            else:
+                # No more cameras found, break the loop
+                break
+        
+        # Select first camera by default if available
+        if self.ui.cameraComboBox.count() > 0:
+            self.ui.cameraComboBox.setCurrentIndex(0)
 
     def validateGameName(self):
         """Validate game name to allow alphanumeric characters"""

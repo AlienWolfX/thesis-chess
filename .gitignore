@@ -12,6 +12,7 @@ old_scripts/*
 training_ipynb/*
 3d_Stuff/*
 model/old/*
+3d_new/*
 
 
 # Development files that should not be in the repo
