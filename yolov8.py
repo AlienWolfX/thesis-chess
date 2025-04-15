@@ -5,11 +5,11 @@ from ultralytics import YOLO
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # Load the YOLOv8 model
-model = YOLO('model/v28.pt').to(device)
+model = YOLO('model/v27.pt').to(device)
 
 # Initialize the webcam ip or usb
 # cameraSrc = "http://192.168.0.100:8080/video" # IP Camera URL
-cameraSrc = 1 # Laptop Webcam
+cameraSrc = 0 # Laptop Webcam
 
 cap = cv2.VideoCapture(cameraSrc)
 

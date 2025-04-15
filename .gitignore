@@ -15,9 +15,9 @@ model/old/*
 
 
 # Development files that should not be in the repo
-
+images.rar
 tech_report.md
-
+meow.py
 *.pgn
 *.csv
 .env
