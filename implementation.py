@@ -16,6 +16,9 @@ import chess.svg
 import cairosvg
 import io
 from PIL import Image
+import psutil
+import threading
+import time
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -26,11 +29,12 @@ cap = cv2.VideoCapture(cameraSrc)
 frame_skip = 2 
 frame_count = 0
 
-CONFIDENCE_THRESHOLD = 0.40  # Global confidence threshold for detections
-BUFFER_SIZE = 8  # Number of frames to keep in buffer
-CONSENSUS_THRESHOLD = 0.4  # 40% agreement threshold for stable state detection
+CONFIDENCE_THRESHOLD = 0.40
+BUFFER_SIZE = 8
+CONSENSUS_THRESHOLD = 0.4
 USE_CENTER_POINT = False
 SHOW_LIVE_WINDOW = True 
+ENABLE_RESOURCE_MONITORING = False
 gameName = datetime.now().strftime("%Y%m%d_%H%M")
 MOVES_FILE = f'matches/game_{gameName}_.csv'
 last_stable_state = None
@@ -114,6 +118,49 @@ class ChessStateBuffer:
                 self.current_stable_state = new_stable_state
                 return True
         return False
+
+class ResourceMonitor:
+    def __init__(self, interval=1.0):
+        self.interval = interval
+        self.running = False
+        self.process = psutil.Process()
+        self.log_file = f'resource_usage_{datetime.now().strftime("%Y%m%d_%H%M")}.csv'
+        
+        # Create/open CSV file with headers
+        with open(self.log_file, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['Timestamp', 'CPU Usage (%)', 'Memory Usage (MB)'])
+    
+    def start(self):
+        self.running = True
+        self.thread = threading.Thread(target=self._monitor)
+        self.thread.start()
+    
+    def stop(self):
+        self.running = False
+        if hasattr(self, 'thread'):
+            self.thread.join()
+    
+    def _monitor(self):
+        while self.running:
+            try:
+                # Get CPU and memory usage
+                cpu_percent = self.process.cpu_percent()
+                memory_mb = self.process.memory_info().rss / 1024 / 1024
+                
+                # Write to CSV
+                with open(self.log_file, 'a', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow([
+                        datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        f"{cpu_percent:.1f}",
+                        f"{memory_mb:.1f}"
+                    ])
+                
+                time.sleep(self.interval)
+            except Exception as e:
+                print(f"Error monitoring resources: {e}")
+                break
 
 def get_piece_point(x1: int, y1: int, x2: int, y2: int) -> tuple:
     """Get the reference point for a piece using middle point between center and bottom."""
@@ -447,6 +494,12 @@ pgn_recorder = PGNRecorder(
     black_player="Black"
 )
 
+# Initialize resource monitor if enabled
+resource_monitor = None
+if ENABLE_RESOURCE_MONITORING:
+    resource_monitor = ResourceMonitor(interval=1.0)
+    resource_monitor.start()
+
 while True:
     ret, frame = cap.read()
     if not ret:
@@ -456,7 +509,7 @@ while True:
     if frame_count % frame_skip != 0:
         continue
 
-    resized_frame = cv2.resize(frame, (620, 540))
+    resized_frame = cv2.resize(frame, (640, 640)) # Rezize frame for YOLO model
     results = model(resized_frame)
     
     # Only create annotated frame if we're showing live window
@@ -535,8 +588,12 @@ while True:
         cv2.imshow('Live', annotated_frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
-        finalize_game(pgn_recorder) 
+        finalize_game(pgn_recorder)
+        if resource_monitor:  # Only stop if monitoring was enabled
+            resource_monitor.stop()
         break
 
 cap.release()
 cv2.destroyAllWindows()
+if resource_monitor:  # Only stop if monitoring was enabled
+    resource_monitor.stop()
