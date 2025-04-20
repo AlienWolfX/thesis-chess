@@ -35,10 +35,13 @@ BUFFER_SIZE = 8
 CONSENSUS_THRESHOLD = 0.4
 USE_CENTER_POINT = False
 SHOW_LIVE_WINDOW = True 
-ENABLE_RESOURCE_MONITORING = True
+ENABLE_RESOURCE_MONITORING = False
 gameName = datetime.now().strftime("%Y%m%d_%H%M")
 MOVES_FILE = f'matches/game_{gameName}_.csv'
 last_stable_state = None
+
+calibrated = False
+square_coords = {}
 
 class_id_mapping = {
     'Black-Bishop': 'b',
@@ -54,8 +57,6 @@ class_id_mapping = {
     'White-Queen': 'Q',
     'White-Rook': 'R',
 }
-
-square_coords = {}
 
 def ensure_directories():
     """Ensure required directories exist"""
@@ -198,6 +199,7 @@ def get_piece_point(x1: int, y1: int, x2: int, y2: int) -> tuple:
     return (center_x, piece_y)
 
 def calibrate_board(results):
+    """Calibrate the chess board using rook positions"""
     piece_positions = {'white_rooks': [], 'black_rooks': []}
     
     for result in results:
@@ -217,6 +219,7 @@ def calibrate_board(results):
     
     # Need all 4 rooks for calibration
     if len(piece_positions['white_rooks']) == 2 and len(piece_positions['black_rooks']) == 2:
+        print("Found all 4 rooks, calibrating grid...")
         # Sort rooks by x-coordinate
         white_rooks = sorted(piece_positions['white_rooks'], key=lambda x: x[0])
         black_rooks = sorted(piece_positions['black_rooks'], key=lambda x: x[0])
@@ -255,7 +258,9 @@ def calibrate_board(results):
                 square_coords[f'{file}{rank}'] = (x, y)
         
         return True
-    return False
+    else:
+        print(f"Waiting for all rooks: White={len(piece_positions['white_rooks'])}/2, Black={len(piece_positions['black_rooks'])}/2")
+        return False
 
 def draw_grid(frame, square_coords):
     if all(k in square_coords for k in ['a1', 'h1', 'a8', 'h8']):
@@ -503,9 +508,16 @@ def create_board_display_svg(board_state):
     
     return opencv_image
 
+def reset_calibration():
+    """Reset calibration state and related variables"""
+    global calibrated, square_coords, last_stable_state
+    calibrated = False
+    square_coords.clear()
+    last_stable_state = None
+    return ChessStateBuffer(BUFFER_SIZE, CONSENSUS_THRESHOLD)
+
 # Main loop
 state_buffer = ChessStateBuffer(BUFFER_SIZE, CONSENSUS_THRESHOLD)
-calibrated = False
 
 # Declare global variable before using it
 last_stable_state = None
@@ -534,7 +546,7 @@ while True:
     if frame_count % frame_skip != 0:
         continue
 
-    resized_frame = cv2.resize(frame, (1680, 1050))  # 1080p resolution
+    resized_frame = cv2.resize(frame, (800, 800))  # 1080p resolution
     
     # Measure inference time
     inference_start = perf_counter()
@@ -633,11 +645,16 @@ while True:
                         (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         cv2.imshow('Live', annotated_frame)
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord('q'):
         finalize_game(pgn_recorder)
-        if resource_monitor:  # Only stop if monitoring was enabled
+        if resource_monitor:
             resource_monitor.stop()
         break
+    elif key == ord('r'):
+        print("Recalibrating grid...")
+        state_buffer = reset_calibration()
+        cv2.destroyWindow('Chess Board')  # Close the chess board window
 
 cap.release()
 cv2.destroyAllWindows()
