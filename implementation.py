@@ -187,19 +187,30 @@ class ResourceMonitor:
                 print(f"Error monitoring resources: {e}")
                 break
 
-def get_piece_point(x1: int, y1: int, x2: int, y2: int) -> tuple:
-    """Get the reference point for a piece using middle point between center and bottom."""
+def get_piece_point(x1: int, y1: int, x2: int, y2: int, is_rook_calibration: bool = False) -> tuple:
+    """
+    Get the reference point for a piece.
+    Args:
+        x1, y1: Top-left corner of bounding box
+        x2, y2: Bottom-right corner of bounding box
+        is_rook_calibration: If True, use bottom point for calibration rooks
+    Returns:
+        tuple: (x, y) coordinates of reference point
+    """
     center_x = (x1 + x2) // 2
-    center_y = (y1 + y2) // 2
-    bottom_y = y2
     
-    # Use midpoint between center and bottom
-    piece_y = (center_y + bottom_y) // 2
-    
-    return (center_x, piece_y)
+    if is_rook_calibration:
+        # Use bottom point for calibration rooks
+        return (center_x, y2)
+    else:
+        # Use weighted point between center and bottom for normal tracking
+        center_y = (y1 + y2) // 2
+        bottom_y = y2
+        piece_y = (center_y + bottom_y) // 2
+        return (center_x, piece_y)
 
 def calibrate_board(results):
-    """Calibrate the chess board using rook positions"""
+    """Calibrate the chess board using rook bottom positions"""
     piece_positions = {'white_rooks': [], 'black_rooks': []}
     
     for result in results:
@@ -209,12 +220,14 @@ def calibrate_board(results):
                 
             x1, y1, x2, y2 = box.xyxy[0].tolist()
             x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
-            piece_point = get_piece_point(x1, y1, x2, y2)
             piece_label = model.names[int(box.cls)]
             
             if piece_label == 'White-Rook':
+                # Use bottom point for calibration rooks
+                piece_point = get_piece_point(x1, y1, x2, y2, is_rook_calibration=True)
                 piece_positions['white_rooks'].append(piece_point)
             elif piece_label == 'Black-Rook':
+                piece_point = get_piece_point(x1, y1, x2, y2, is_rook_calibration=True)
                 piece_positions['black_rooks'].append(piece_point)
     
     # Need all 4 rooks for calibration
