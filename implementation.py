@@ -19,11 +19,12 @@ from PIL import Image
 import psutil
 import threading
 import time
+from time import perf_counter
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 #### SETTINGS ####
-model = YOLO('model/v27.pt').to(device)
+model = YOLO('model/v29.pt').to(device)
 cameraSrc = 0 
 cap = cv2.VideoCapture(cameraSrc)
 frame_skip = 2 
@@ -34,7 +35,7 @@ BUFFER_SIZE = 8
 CONSENSUS_THRESHOLD = 0.4
 USE_CENTER_POINT = False
 SHOW_LIVE_WINDOW = True 
-ENABLE_RESOURCE_MONITORING = False
+ENABLE_RESOURCE_MONITORING = True
 gameName = datetime.now().strftime("%Y%m%d_%H%M")
 MOVES_FILE = f'matches/game_{gameName}_.csv'
 last_stable_state = None
@@ -125,11 +126,26 @@ class ResourceMonitor:
         self.running = False
         self.process = psutil.Process()
         self.log_file = f'resource_usage_{datetime.now().strftime("%Y%m%d_%H%M")}.csv'
+        self.fps_buffer = deque(maxlen=30)
+        self.inference_times = deque(maxlen=30)
+        self.start_time = perf_counter()
         
-        # Create/open CSV file with headers
+        # Create/open CSV file with expanded headers
         with open(self.log_file, 'w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(['Timestamp', 'CPU Usage (%)', 'Memory Usage (MB)'])
+            writer.writerow([
+                'Timestamp', 
+                'CPU Usage (%)', 
+                'Memory Usage (MB)',
+                'FPS',
+                'Inference Time (ms)',
+                'Uptime (s)'
+            ])
+    
+    def add_performance_metrics(self, frame_time: float, inference_time: float):
+        """Add frame and inference times to buffers"""
+        self.fps_buffer.append(frame_time)
+        self.inference_times.append(inference_time)
     
     def start(self):
         self.running = True
@@ -148,13 +164,21 @@ class ResourceMonitor:
                 cpu_percent = self.process.cpu_percent()
                 memory_mb = self.process.memory_info().rss / 1024 / 1024
                 
+                # Calculate FPS and average inference time
+                current_fps = 1.0 / (sum(self.fps_buffer) / len(self.fps_buffer)) if self.fps_buffer else 0
+                avg_inference = (sum(self.inference_times) / len(self.inference_times) * 1000) if self.inference_times else 0
+                uptime = perf_counter() - self.start_time
+                
                 # Write to CSV
                 with open(self.log_file, 'a', newline='') as f:
                     writer = csv.writer(f)
                     writer.writerow([
                         datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                         f"{cpu_percent:.1f}",
-                        f"{memory_mb:.1f}"
+                        f"{memory_mb:.1f}",
+                        f"{current_fps:.1f}",
+                        f"{avg_inference:.1f}",
+                        f"{int(uptime)}"
                     ])
                 
                 time.sleep(self.interval)
@@ -501,6 +525,7 @@ if ENABLE_RESOURCE_MONITORING:
     resource_monitor.start()
 
 while True:
+    frame_start = perf_counter()
     ret, frame = cap.read()
     if not ret:
         break
@@ -509,8 +534,17 @@ while True:
     if frame_count % frame_skip != 0:
         continue
 
-    resized_frame = cv2.resize(frame, (640, 640)) # Rezize frame for YOLO model
+    resized_frame = cv2.resize(frame, (1680, 1050))  # 1080p resolution
+    
+    # Measure inference time
+    inference_start = perf_counter()
     results = model(resized_frame)
+    inference_time = perf_counter() - inference_start
+    
+    # Calculate frame time and update resource monitor
+    frame_time = perf_counter() - frame_start
+    if resource_monitor:
+        resource_monitor.add_performance_metrics(frame_time, inference_time)
     
     # Only create annotated frame if we're showing live window
     annotated_frame = resized_frame.copy() if SHOW_LIVE_WINDOW else None
@@ -585,6 +619,18 @@ while True:
         draw_grid(annotated_frame, square_coords)
         cv2.putText(annotated_frame, "Calibrated" if calibrated else "Calibrating...", 
                     (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        # Add FPS counter
+        current_fps = 1.0 / frame_time
+        cv2.putText(annotated_frame, f"FPS: {current_fps:.1f}", 
+                    (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        # Add inference time
+        cv2.putText(annotated_frame, f"Inference: {inference_time*1000:.1f}ms", 
+                    (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        # Add uptime if resource monitor is enabled
+        if resource_monitor:
+            uptime = perf_counter() - resource_monitor.start_time
+            cv2.putText(annotated_frame, f"Uptime: {int(uptime)}s", 
+                        (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         cv2.imshow('Live', annotated_frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
