@@ -3,7 +3,8 @@ GUI for the project.
 """
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QDialog, QFileDialog, QListWidgetItem, QMessageBox
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6 import QtGui
 from forms.mainWindow import Ui_MainWindow
 from forms.newGame import Ui_newGame
 from forms.viewHistory import Ui_viewHistory
@@ -55,10 +56,21 @@ class MainWindow(QMainWindow):
         self.aboutDialog.exec()
 
 class ChessGameWindow(QMainWindow):
+    moveMade = pyqtSignal(str, str)  # (color, move)
+
     def __init__(self, game_details, parent=None):
         super().__init__(parent)
         self.ui = Ui_ChessGameWindow()
         self.ui.setupUi(self)
+
+        # Set up models for the list views
+        self.white_moves_model = QtGui.QStandardItemModel()
+        self.black_moves_model = QtGui.QStandardItemModel()
+        self.ui.player1listView.setModel(self.white_moves_model)
+        self.ui.player2listView.setModel(self.black_moves_model)
+
+        # Connect the moveMade signal to the slot
+        self.moveMade.connect(self.addMoveToListView)
         
         # Set game information
         self.ui.gameNameLabel.setText(f"Game: {game_details['game_name']}")
@@ -219,9 +231,14 @@ class ChessGameWindow(QMainWindow):
                     # Process move if board state changed
                     if self.last_stable_state is not None:
                         if is_reachable_state(self.last_stable_state, stable_state):
-                            save_move_to_csv_and_pgn(self.last_stable_state, stable_state, self.pgn_recorder)
+                            san_move = save_move_to_csv_and_pgn(self.last_stable_state, stable_state, self.pgn_recorder)
+                            print(f"Yawa: {san_move}")
+                            if san_move:
+                                color = "Black" if self.pgn_recorder.is_white_move else "White"
+                                self.moveMade.emit(color, san_move)
+                            
                             self.ui.gameStatusIndicator.setStyleSheet("background-color: #4CAF50;")  # Green for active game
-                    
+                            
                     self.last_stable_state = stable_state.copy()
                     
                     # Update chessboard display
@@ -258,6 +275,16 @@ class ChessGameWindow(QMainWindow):
         
         # Load SVG into widget
         self.ui.chessboard.load(bytearray(svg_content, encoding='utf-8'))
+    
+    def addMoveToListView(self, color, move):
+        if color == "White":
+            item = QtGui.QStandardItem(move)
+            self.white_moves_model.appendRow(item)
+            self.ui.player1listView.scrollToBottom()
+        else:
+            item = QtGui.QStandardItem(move)
+            self.black_moves_model.appendRow(item)
+            self.ui.player2listView.scrollToBottom()
     
     def endGame(self):
         """Close the ChessGameWindow and save the game."""

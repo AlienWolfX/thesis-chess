@@ -434,15 +434,15 @@ def is_reachable_state(old_state: Dict[str, str], new_state: Dict[str, str], max
     # So max_moves * 2 is the maximum number of squares that can change
     return differences <= (max_moves * 2)
 
-def save_move_to_csv_and_pgn(old_state: Dict[str, str], new_state: Dict[str, str], pgn_recorder: PGNRecorder) -> None:
+def save_move_to_csv_and_pgn(old_state: Dict[str, str], new_state: Dict[str, str], pgn_recorder: PGNRecorder) -> str:
     """Compare two board states and store the detected move with detailed information in CSV."""
     if old_state is None:
-        return
+        return None
         
     # Check if the new state is reachable
     if not is_reachable_state(old_state, new_state):
         print("Warning: New board state is not reachable within 2 moves - ignoring")
-        return
+        return None
         
     # Find differences between states
     moved_from = None
@@ -464,12 +464,11 @@ def save_move_to_csv_and_pgn(old_state: Dict[str, str], new_state: Dict[str, str
                 if square in old_state:
                     captured_piece = old_state[square]
     
+    san_move = None
     if moved_from and moved_to and piece_moved:
         try:
-            # Create chess move
             chess_move = chess.Move.from_uci(f"{moved_from}{moved_to}")
             if chess_move in pgn_recorder.board.legal_moves:
-                # Get algebraic notation for PGN
                 san_move = pgn_recorder.board.san(chess_move)
                 
                 # Add move to PGN history
@@ -538,6 +537,7 @@ def save_move_to_csv_and_pgn(old_state: Dict[str, str], new_state: Dict[str, str
                 
         except Exception as e:
             print(f"Error recording move: {e}")
+    return san_move
 
 def finalize_game(pgn_recorder: PGNRecorder, result: str = "*") -> None:
     """Finalize the game and save both PGN and CSV files."""
