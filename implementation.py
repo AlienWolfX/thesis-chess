@@ -435,7 +435,7 @@ def is_reachable_state(old_state: Dict[str, str], new_state: Dict[str, str], max
     return differences <= (max_moves * 2)
 
 def save_move_to_csv_and_pgn(old_state: Dict[str, str], new_state: Dict[str, str], pgn_recorder: PGNRecorder) -> None:
-    """Compare two board states and store the detected move."""
+    """Compare two board states and store the detected move with detailed information in CSV."""
     if old_state is None:
         return
         
@@ -466,13 +466,13 @@ def save_move_to_csv_and_pgn(old_state: Dict[str, str], new_state: Dict[str, str
     
     if moved_from and moved_to and piece_moved:
         try:
-            # Create chess move (python-chess will handle capture notation)
+            # Create chess move
             chess_move = chess.Move.from_uci(f"{moved_from}{moved_to}")
             if chess_move in pgn_recorder.board.legal_moves:
-                # Get algebraic notation (will include 'x' for captures)
+                # Get algebraic notation for PGN
                 san_move = pgn_recorder.board.san(chess_move)
                 
-                # Add move to history
+                # Add move to PGN history
                 pgn_recorder.add_move_to_history(san_move)
                 
                 # Update game state
@@ -485,10 +485,56 @@ def save_move_to_csv_and_pgn(old_state: Dict[str, str], new_state: Dict[str, str
                     pgn_recorder.current_move_number += 1
                 pgn_recorder.is_white_move = not pgn_recorder.is_white_move
                 
-                move_text = san_move
+                # Get additional information for CSV
+                is_capture = bool(captured_piece)
+                piece_type = "White" if piece_moved.isupper() else "Black"
+                piece_name = {
+                    'P': 'Pawn', 'N': 'Knight', 'B': 'Bishop',
+                    'R': 'Rook', 'Q': 'Queen', 'K': 'King',
+                    'p': 'Pawn', 'n': 'Knight', 'b': 'Bishop',
+                    'r': 'Rook', 'q': 'Queen', 'k': 'King'
+                }.get(piece_moved, 'Unknown')
+                
+                captured_piece_info = ""
                 if captured_piece:
-                    print(f"Capture detected: {piece_moved} takes {captured_piece} on {moved_to}")
-                print(f"Move {move_text} recorded. Total moves: {pgn_recorder.moves_played}")
+                    captured_color = "White" if captured_piece.isupper() else "Black"
+                    captured_name = {
+                        'P': 'Pawn', 'N': 'Knight', 'B': 'Bishop',
+                        'R': 'Rook', 'Q': 'Queen', 'K': 'King',
+                        'p': 'Pawn', 'n': 'Knight', 'b': 'Bishop',
+                        'r': 'Rook', 'q': 'Queen', 'k': 'King'
+                    }.get(captured_piece, 'Unknown')
+                    captured_piece_info = f"{captured_color} {captured_name}"
+                
+                # Save detailed move to CSV
+                csv_filename = f"matches/game_{pgn_recorder.game.headers['Event'].replace('Game ', '')}_final.csv"
+                ensure_directories()
+                with open(csv_filename, 'a', newline='') as f:
+                    writer = csv.writer(f)
+                    if pgn_recorder.moves_played == 1:  # Write header for first move
+                        writer.writerow([
+                            'Game', 'Timestamp', 'Move Number', 'Player Color',
+                            'Piece Type', 'Move From', 'Move To', 'SAN Notation',
+                            'Is Capture', 'Captured Piece', 'Board Position'
+                        ])
+                    
+                    writer.writerow([
+                        pgn_recorder.game.headers['Event'],
+                        datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        pgn_recorder.current_move_number,
+                        piece_type,
+                        piece_name,
+                        moved_from,
+                        moved_to,
+                        san_move,
+                        is_capture,
+                        captured_piece_info,
+                        pgn_recorder.board.fen()
+                    ])
+                
+                print(f"Move {san_move} recorded. Total moves: {pgn_recorder.moves_played}")
+                if captured_piece:
+                    print(f"Capture: {piece_type} {piece_name} takes {captured_piece_info} on {moved_to}")
                 
         except Exception as e:
             print(f"Error recording move: {e}")
@@ -507,22 +553,11 @@ def finalize_game(pgn_recorder: PGNRecorder, result: str = "*") -> None:
         pgn_filename = f"matches/game_{game_name}_final.pgn"
         with open(pgn_filename, "w") as f:
             print(pgn_recorder.game, file=f)
-            
-        # Save CSV file with the same base name as PGN
-        csv_filename = f"matches/game_{game_name}_final.csv"
-        ensure_directories()
-        with open(csv_filename, 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(['Game', 'Timestamp', 'Moves'])
-            for move in pgn_recorder.move_history:
-                writer.writerow([
-                    game_name,
-                    datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    move
-                ])
-            
+        
+        # The CSV file is already being written with detailed information
+        # in save_move_to_csv_and_pgn(), so we don't need to modify it here
+        
         print(f"Game saved to {pgn_filename}")
-        print(f"CSV saved to {csv_filename}")
         print(f"Total moves recorded: {pgn_recorder.moves_played}")
         
     except Exception as e:

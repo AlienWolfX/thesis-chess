@@ -533,19 +533,6 @@ class ViewHistory(QDialog):
             self.chessboard.reset()
             self.current_move_index = 0
 
-    def fetch_moves_from_csv(self, csv_path):
-        """Read and process moves from CSV file"""
-        self.moves_df, headers = load_csv_moves(csv_path)
-        
-        # Update game information labels
-        self.ui.gameNoLabel.setText(headers.get('Event', ''))
-        self.ui.labelDate.setText(f"Date: {headers.get('Date', '')}")
-        self.ui.whitePlayerLabel.setText(headers.get('White', 'White'))
-        self.ui.blackPlayerLabel.setText(headers.get('Black', 'Black'))
-        
-        self.chessboard.reset()
-        self.current_move_index = 0
-
     def display_moves_list(self):
         """Display moves in the moves list"""
         self.ui.movesList.clear()
