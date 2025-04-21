@@ -4,7 +4,6 @@ import chess
 import chess.svg
 import chess.pgn
 import pandas as pd
-import os
 
 def render_chessboard(board, board_size, initial=False):
     """Render chess board as QPixmap"""

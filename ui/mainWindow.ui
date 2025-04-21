@@ -90,7 +90,6 @@
     </property>
     <addaction name="actionNew_Game"/>
     <addaction name="separator"/>
-    <addaction name="actionOpen_CSV"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">

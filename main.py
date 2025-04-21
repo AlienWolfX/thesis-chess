@@ -35,6 +35,7 @@ class MainWindow(QMainWindow):
                 print(f"Black player: {game_details['black_player']}")
                 print(f"Round: {game_details['round']}")
                 print(f"Site: {game_details['site']}")
+                print(f"Using camera with ID: {game_details['camera_id']}")
                 
                 self.chessGameWindow = ChessGameWindow(game_details)
                 self.chessGameWindow.show()
@@ -188,7 +189,14 @@ class NewGame(QDialog):
         self.game_details['white_player'] = self.ui.whitePlayerEdit.text()
         self.game_details['black_player'] = self.ui.blackPlayerEdit.text()
         self.game_details['round'] = self.ui.roundEdit.text()
-        self.game_details['site'] = self.ui.siteEdit.text() 
+        self.game_details['site'] = self.ui.siteEdit.text()
+        
+        # Get and save selected camera ID
+        current_index = self.ui.cameraComboBox.currentIndex()
+        camera_id = self.ui.cameraComboBox.itemData(current_index)
+        self.game_details['camera_id'] = camera_id
+        print(f"Selected camera ID: {camera_id}")
+        
         self.accept()
 
     def getGameDetails(self):
