@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
-    <height>932</height>
+    <width>900</width>
+    <height>700</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,7 +28,7 @@
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>40</width>
+          <width>20</width>
           <height>20</height>
          </size>
         </property>
@@ -107,42 +107,145 @@
        </widget>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="statusIndicatorsLayout">
-        <item>
-         <widget class="QLabel" name="chessboardStatusIndicator">
-          <property name="styleSheet">
-           <string notr="true">
-            background-color: #4CAF50;  /* Green color */
+       <widget class="QGroupBox" name="statusGroup">
+        <property name="styleSheet">
+         <string notr="true">
+           QGroupBox {
+            border: 1px solid #ccc;
             border-radius: 5px;
-            min-width: 10px;
-            min-height: 10px;
-            max-width: 10px;
-            max-height: 10px;
-           </string>
-          </property>
-          <property name="toolTip">
-           <string>Chessboard Connection</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="gameStatusIndicator">
-          <property name="styleSheet">
-           <string notr="true">
-            background-color: #FFC107;  /* Yellow color */
-            border-radius: 5px;
-            min-width: 10px;
-            min-height: 10px;
-            max-width: 10px;
-            max-height: 10px;
-           </string>
-          </property>
-          <property name="toolTip">
-           <string>Game Status</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+            margin-top: 10px;
+           }
+           QGroupBox::title {
+            subcontrol-origin: margin;
+            left: 10px;
+            padding: 0 3px;
+           }
+         </string>
+        </property>
+        <property name="title">
+         <string>Status Indicators</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalStatusLayout">
+         <item>
+          <layout class="QHBoxLayout" name="chessboardStatusLayout">
+           <item>
+            <widget class="QLabel" name="chessboardStatusIndicator">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>16</width>
+               <height>16</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16</width>
+               <height>16</height>
+              </size>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">
+               background-color: #4CAF50;
+               border-radius: 8px;
+               min-width: 16px;
+               min-height: 16px;
+               max-width: 16px;
+               max-height: 16px;
+              </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="chessboardStatusSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>6</width>
+               <height>10</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="chessboardStatusLabel">
+             <property name="styleSheet">
+              <string notr="true">font-size: 12px; color: #666;</string>
+             </property>
+             <property name="text">
+              <string>Chessboard Connected</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="gameStatusLayout">
+           <item>
+            <widget class="QLabel" name="gameStatusIndicator">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>16</width>
+               <height>16</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16</width>
+               <height>16</height>
+              </size>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">
+               background-color: #FFC107;
+               border-radius: 8px;
+               min-width: 16px;
+               min-height: 16px;
+               max-width: 16px;
+               max-height: 16px;
+              </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="gameStatusSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>6</width>
+               <height>10</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="gameStatusLabel">
+             <property name="styleSheet">
+              <string notr="true">font-size: 12px; color: #666;</string>
+             </property>
+             <property name="text">
+              <string>Game Active</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
       </item>
       <item>
        <spacer name="horizontalSpacerRight">
@@ -167,25 +270,18 @@
          <widget class="QSvgWidget" name="chessboard" native="true">
           <property name="minimumSize">
            <size>
-            <width>500</width>
-            <height>500</height>
+            <width>480</width>
+            <height>480</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>480</width>
+            <height>480</height>
            </size>
           </property>
           <property name="styleSheet">
            <string notr="true">border: 2px solid #333; background: white;</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="appIcon">
-          <property name="styleSheet">
-           <string notr="true">padding: 20px;</string>
-          </property>
-          <property name="pixmap">
-           <pixmap>../img/rookeye.ph.png</pixmap>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
@@ -203,12 +299,12 @@
             <widget class="QLineEdit" name="player1Name">
              <property name="styleSheet">
               <string notr="true">
-                padding: 5px;
-                font-size: 14px;
+                padding: 1px;
+                font-size: 13px;
                 background: #f8f8f8;
                 border: 1px solid #ddd;
                 color: #333;
-               </string>
+              </string>
              </property>
              <property name="readOnly">
               <bool>true</bool>
@@ -217,15 +313,27 @@
            </item>
            <item>
             <widget class="QListView" name="player1listView">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>80</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>80</height>
+              </size>
+             </property>
              <property name="styleSheet">
               <string notr="true">
                 QListView {
                  background: #f8f8f8;
                  border: 1px solid #ddd;
-                 border-radius: 5px;
-                 padding: 5px;
+                 border-radius: 2px;
+                 padding: 1px;
                 }
-               </string>
+              </string>
              </property>
             </widget>
            </item>
@@ -242,12 +350,12 @@
             <widget class="QLineEdit" name="player2Name">
              <property name="styleSheet">
               <string notr="true">
-                padding: 5px;
-                font-size: 14px;
+                padding: 1px;
+                font-size: 13px;
                 background: #f8f8f8;
                 border: 1px solid #ddd;
                 color: #333;
-               </string>
+              </string>
              </property>
              <property name="readOnly">
               <bool>true</bool>
@@ -256,15 +364,27 @@
            </item>
            <item>
             <widget class="QListView" name="player2listView">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>80</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>80</height>
+              </size>
+             </property>
              <property name="styleSheet">
               <string notr="true">
                 QListView {
                  background: #f8f8f8;
                  border: 1px solid #ddd;
-                 border-radius: 5px;
-                 padding: 5px;
+                 border-radius: 2px;
+                 padding: 1px;
                 }
-               </string>
+              </string>
              </property>
             </widget>
            </item>

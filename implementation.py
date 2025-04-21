@@ -38,7 +38,6 @@ CONSENSUS_THRESHOLD = 0.4
 SHOW_LIVE_WINDOW = True 
 ENABLE_RESOURCE_MONITORING = False
 gameName = datetime.now().strftime("%Y%m%d_%H%M")
-MOVES_FILE = f'matches/game_{gameName}_.csv'
 last_stable_state = None
 
 calibrated = False
@@ -509,9 +508,10 @@ def finalize_game(pgn_recorder: PGNRecorder, result: str = "*") -> None:
         with open(pgn_filename, "w") as f:
             print(pgn_recorder.game, file=f)
             
-        # Save CSV file with move history
+        # Save CSV file with the same base name as PGN
+        csv_filename = f"matches/game_{game_name}_final.csv"
         ensure_directories()
-        with open(MOVES_FILE, 'w', newline='') as f:
+        with open(csv_filename, 'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(['Game', 'Timestamp', 'Moves'])
             for move in pgn_recorder.move_history:
@@ -522,6 +522,7 @@ def finalize_game(pgn_recorder: PGNRecorder, result: str = "*") -> None:
                 ])
             
         print(f"Game saved to {pgn_filename}")
+        print(f"CSV saved to {csv_filename}")
         print(f"Total moves recorded: {pgn_recorder.moves_played}")
         
     except Exception as e:
