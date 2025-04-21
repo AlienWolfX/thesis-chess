@@ -64,12 +64,13 @@ def ensure_directories():
     os.makedirs("matches", exist_ok=True)
 
 class PGNRecorder:
-    def __init__(self, game_name: str, white_player: str = "White", black_player: str = "Black"):
+    def __init__(self, game_name: str, white_player: str = "White", black_player: str = "Black", 
+                 site: str = "Chess Tracking System", round_num: str = "1"):
         self.game = chess.pgn.Game()
         self.game.headers["Event"] = f"Game {game_name}"
-        self.game.headers["Site"] = "Chess Tracking System"
+        self.game.headers["Site"] = site
         self.game.headers["Date"] = datetime.now().strftime("%Y.%m.%d")
-        self.game.headers["Round"] = "1"
+        self.game.headers["Round"] = round_num
         self.game.headers["White"] = white_player
         self.game.headers["Black"] = black_player
         self.game.headers["Result"] = "*"
@@ -535,149 +536,136 @@ def reset_calibration():
     return ChessStateBuffer(BUFFER_SIZE, CONSENSUS_THRESHOLD)
 
 # Main loop
-state_buffer = ChessStateBuffer(BUFFER_SIZE, CONSENSUS_THRESHOLD)
-
-# Declare global variable before using it
-last_stable_state = None
-
-# Initialize PGN recorder before the main loop
-ensure_directories()
-pgn_recorder = PGNRecorder(
-    game_name=datetime.now().strftime("%Y%m%d_%H%M"),
-    white_player="White",
-    black_player="Black"
-)
-
-# Initialize resource monitor if enabled
-resource_monitor = None
-if ENABLE_RESOURCE_MONITORING:
-    resource_monitor = ResourceMonitor(interval=1.0)
-    resource_monitor.start()
-
-# Initialize ChessDisplay
-chess_display = ChessDisplay(size=800)
-
-while True:
-    frame_start = perf_counter()
-    ret, frame = cap.read()
-    if not ret:
-        break
-
-    frame_count += 1
-    if frame_count % frame_skip != 0:
-        continue
-
-    resized_frame = cv2.resize(frame, (WIDTH, HEIGHT), 
-                             interpolation=cv2.INTER_AREA)
-    
-    # Measure inference time
-    inference_start = perf_counter()
-    results = model(resized_frame)
-    inference_time = perf_counter() - inference_start
-    
-    # Calculate frame time and update resource monitor
-    frame_time = perf_counter() - frame_start
-    if resource_monitor:
-        resource_monitor.add_performance_metrics(frame_time, inference_time)
-    
-    # Only create annotated frame if we're showing live window
-    annotated_frame = resized_frame.copy() if SHOW_LIVE_WINDOW else None
-
-    if not calibrated:
-        calibrated = calibrate_board(results)
-    
+if __name__ == "__main__":
+    # Only create windows if we're supposed to show them
     if SHOW_LIVE_WINDOW:
-        draw_grid(annotated_frame, square_coords)
-    
-    if calibrated:
-        current_positions = track_pieces(results)
-        
-        # Add state to buffer and check for stable state
-        if state_buffer.add_state(current_positions):
-            stable_state = state_buffer.current_stable_state
-            print("New stable board state detected:")
-            print(json.dumps(stable_state, indent=2))
-            
-            # Save move to CSV and PGN when board state changes
-            if last_stable_state is not None:
-                save_move_to_csv_and_pgn(last_stable_state, stable_state, pgn_recorder)
-            last_stable_state = stable_state.copy()
-        
-        # Use cached display update
-        display_state = state_buffer.current_stable_state if state_buffer.current_stable_state else current_positions
-        board_vis = chess_display.update(display_state)
-        
-        # Position the board window
+        cv2.namedWindow('Live', cv2.WINDOW_NORMAL)
+        cv2.moveWindow('Live', 0, 0)
         cv2.namedWindow('Chess Board', cv2.WINDOW_NORMAL)
         cv2.resizeWindow('Chess Board', 800, 800)
         cv2.moveWindow('Chess Board', 600, 0)
-        cv2.imshow('Chess Board', board_vis)
+    
+    while True:
+        frame_start = perf_counter()
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        frame_count += 1
+        if frame_count % frame_skip != 0:
+            continue
+
+        resized_frame = cv2.resize(frame, (WIDTH, HEIGHT), 
+                                 interpolation=cv2.INTER_AREA)
         
-        # Only process visualization if live window is enabled
+        # Measure inference time
+        inference_start = perf_counter()
+        results = model(resized_frame)
+        inference_time = perf_counter() - inference_start
+        
+        # Calculate frame time and update resource monitor
+        frame_time = perf_counter() - frame_start
+        if resource_monitor:
+            resource_monitor.add_performance_metrics(frame_time, inference_time)
+        
+        # Only create annotated frame if we're showing live window
+        annotated_frame = resized_frame.copy() if SHOW_LIVE_WINDOW else None
+
+        if not calibrated:
+            calibrated = calibrate_board(results)
+        
         if SHOW_LIVE_WINDOW:
-            for result in results:
-                for box in result.boxes:
-                    if box.conf[0] < CONFIDENCE_THRESHOLD: 
-                        continue
+            draw_grid(annotated_frame, square_coords)
+        
+        if calibrated:
+            current_positions = track_pieces(results)
+            
+            # Add state to buffer and check for stable state
+            if state_buffer.add_state(current_positions):
+                stable_state = state_buffer.current_stable_state
+                print("New stable board state detected:")
+                print(json.dumps(stable_state, indent=2))
+                
+                # Save move to CSV and PGN when board state changes
+                if last_stable_state is not None:
+                    save_move_to_csv_and_pgn(last_stable_state, stable_state, pgn_recorder)
+                last_stable_state = stable_state.copy()
+            
+            # Use cached display update
+            display_state = state_buffer.current_stable_state if state_buffer.current_stable_state else current_positions
+            board_vis = chess_display.update(display_state)
+            
+            # Only show windows if SHOW_LIVE_WINDOW is True
+            if SHOW_LIVE_WINDOW:
+                cv2.imshow('Live', annotated_frame)
+                if board_vis is not None:
+                    cv2.imshow('Chess Board', board_vis)
+            
+            # Only process visualization if live window is enabled
+            if SHOW_LIVE_WINDOW:
+                for result in results:
+                    for box in result.boxes:
+                        if box.conf[0] < CONFIDENCE_THRESHOLD: 
+                            continue
+                            
+                        x1, y1, x2, y2 = box.xyxy[0].tolist()
+                        x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
+                        piece_label = model.names[int(box.cls)]
+                        piece_point = get_piece_point(x1, y1, x2, y2)
+                        confidence = float(box.conf[0])
                         
-                    x1, y1, x2, y2 = box.xyxy[0].tolist()
-                    x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
-                    piece_label = model.names[int(box.cls)]
-                    piece_point = get_piece_point(x1, y1, x2, y2)
-                    confidence = float(box.conf[0])
-                    
-                    # Draw bounding box and label with confidence
-                    cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), (255, 255, 255), 1)
-                    label_text = f"{piece_label} ({confidence:.2f})"
-                    cv2.putText(annotated_frame, label_text, (x1, y1 - 5), 
-                               cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
-                    
-                    # Find closest square
-                    closest_square = None
-                    min_distance = float('inf')
-                    for square, coord in square_coords.items():
-                        distance = np.sqrt((piece_point[0] - coord[0])**2 + 
-                                         (piece_point[1] - coord[1])**2)
-                        if distance < min_distance:
-                            min_distance = distance
-                            closest_square = square
-                    
-                    if closest_square and min_distance < 50:
-                        # Draw connection line to mapped square
-                        mapped_pos = square_coords[closest_square]
-                        cv2.line(annotated_frame, piece_point, mapped_pos, (0, 255, 255), 1)
-                        cv2.circle(annotated_frame, mapped_pos, 4, (0, 255, 255), -1)
+                        # Draw bounding box and label with confidence
+                        cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), (255, 255, 255), 1)
+                        label_text = f"{piece_label} ({confidence:.2f})"
+                        cv2.putText(annotated_frame, label_text, (x1, y1 - 5), 
+                                   cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
+                        
+                        # Find closest square
+                        closest_square = None
+                        min_distance = float('inf')
+                        for square, coord in square_coords.items():
+                            distance = np.sqrt((piece_point[0] - coord[0])**2 + 
+                                             (piece_point[1] - coord[1])**2)
+                            if distance < min_distance:
+                                min_distance = distance
+                                closest_square = square
+                        
+                        if closest_square and min_distance < 50:
+                            # Draw connection line to mapped square
+                            mapped_pos = square_coords[closest_square]
+                            cv2.line(annotated_frame, piece_point, mapped_pos, (0, 255, 255), 1)
+                            cv2.circle(annotated_frame, mapped_pos, 4, (0, 255, 255), -1)
 
-    if SHOW_LIVE_WINDOW:
-        draw_grid(annotated_frame, square_coords)
-        cv2.putText(annotated_frame, "Calibrated" if calibrated else "Calibrating...", 
-                    (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-        # Add FPS counter
-        current_fps = 1.0 / frame_time
-        cv2.putText(annotated_frame, f"FPS: {current_fps:.1f}", 
-                    (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-        # Add inference time
-        cv2.putText(annotated_frame, f"Inference: {inference_time*1000:.1f}ms", 
-                    (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-        # Add uptime if resource monitor is enabled
-        if resource_monitor:
-            uptime = perf_counter() - resource_monitor.start_time
-            cv2.putText(annotated_frame, f"Uptime: {int(uptime)}s", 
-                        (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-        cv2.imshow('Live', annotated_frame)
+        if SHOW_LIVE_WINDOW:
+            draw_grid(annotated_frame, square_coords)
+            cv2.putText(annotated_frame, "Calibrated" if calibrated else "Calibrating...", 
+                        (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            # Add FPS counter
+            current_fps = 1.0 / frame_time
+            cv2.putText(annotated_frame, f"FPS: {current_fps:.1f}", 
+                        (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            # Add inference time
+            cv2.putText(annotated_frame, f"Inference: {inference_time*1000:.1f}ms", 
+                        (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            # Add uptime if resource monitor is enabled
+            if resource_monitor:
+                uptime = perf_counter() - resource_monitor.start_time
+                cv2.putText(annotated_frame, f"Uptime: {int(uptime)}s", 
+                            (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            cv2.imshow('Live', annotated_frame)
 
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord('q'):
-        finalize_game(pgn_recorder)
-        if resource_monitor:
-            resource_monitor.stop()
-        break
-    elif key == ord('r'):
-        print("Recalibrating grid...")
-        state_buffer = reset_calibration()
-        cv2.destroyWindow('Chess Board')  # Close the chess board window
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'):
+            finalize_game(pgn_recorder)
+            if resource_monitor:
+                resource_monitor.stop()
+            break
+        elif key == ord('r'):
+            print("Recalibrating grid...")
+            state_buffer = reset_calibration()
+            cv2.destroyWindow('Chess Board')  # Close the chess board window
 
-cap.release()
-cv2.destroyAllWindows()
-if resource_monitor:  # Only stop if monitoring was enabled
-    resource_monitor.stop()
+    cap.release()
+    cv2.destroyAllWindows()
+    if resource_monitor:  # Only stop if monitoring was enabled
+        resource_monitor.stop()

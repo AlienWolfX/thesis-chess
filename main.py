@@ -15,6 +15,12 @@ import os
 import pandas as pd
 from utils.view_history_utils import render_chessboard, load_pgn_moves, load_csv_moves
 from utils.validation_utils import validate_alphanumeric, validate_alphanumeric_with_spaces, validate_numeric
+import threading
+import numpy as np
+import time
+from datetime import datetime
+import os
+import io
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -65,9 +71,212 @@ class ChessGameWindow(QMainWindow):
         
         # Connect the End Game button to close the window
         self.ui.endButton.clicked.connect(self.endGame)
-
+        
+        # Store game details for chess implementation
+        self.game_details = game_details
+        
+        # Import implementation modules but disable window display
+        from implementation import ensure_directories, PGNRecorder, ChessStateBuffer
+        from implementation import ChessDisplay, reset_calibration, BUFFER_SIZE, CONSENSUS_THRESHOLD
+        import implementation
+        import chess
+        
+        implementation.SHOW_LIVE_WINDOW = False
+        
+        self.initChessImplementation()
+        
+        self.displayImplementationStartingPosition()
+    
+    def displayImplementationStartingPosition(self):
+        """Display the standard starting position using implementation's styling"""
+        import chess
+        import chess.svg
+        
+        # Create standard starting position board
+        board = chess.Board()
+        
+        # Generate SVG with implementation styling
+        svg_content = chess.svg.board(
+            board=board, 
+            size=500,
+            coordinates=True,
+            colors={'square light': '#F0D9B5', 'square dark': '#B58863'}
+        )
+        
+        # Load SVG into widget
+        self.ui.chessboard.load(bytearray(svg_content, encoding='utf-8'))
+        
+        # Also initialize the chess display from implementation
+        # with the standard starting position
+        standard_position = {}
+        # Add all pieces in their starting positions
+        for square in chess.SQUARES:
+            piece = board.piece_at(square)
+            if piece:
+                square_name = chess.square_name(square)
+                standard_position[square_name] = piece.symbol()
+        
+        # Update the implementation's chess display
+        self.chess_display.update(standard_position)
+        
+        # Store as the last stable state
+        self.last_stable_state = standard_position.copy()
+    
+    def initChessImplementation(self):
+        """Initialize the chess tracking implementation."""
+        from implementation import ensure_directories, PGNRecorder, ChessStateBuffer
+        from implementation import ChessDisplay, reset_calibration, BUFFER_SIZE, CONSENSUS_THRESHOLD
+        import cv2
+        import threading
+        from datetime import datetime
+        import os
+        
+        # Ensure required directories exist
+        ensure_directories()
+        
+        # Initialize PGN recorder with game details including site and round
+        self.pgn_recorder = PGNRecorder(
+            game_name=self.game_details['game_name'],
+            white_player=self.game_details['white_player'],
+            black_player=self.game_details['black_player'],
+            site=self.game_details['site'],
+            round_num=self.game_details['round']
+        )
+        
+        # Create chess display
+        self.chess_display = ChessDisplay(size=500)  # Size to fit SVG widget
+        
+        # Create state buffer
+        self.state_buffer = ChessStateBuffer(BUFFER_SIZE, CONSENSUS_THRESHOLD)
+        
+        # Initialize camera with selected ID
+        self.camera_id = self.game_details['camera_id']
+        self.cap = cv2.VideoCapture(self.camera_id)
+        
+        # Set camera resolution if needed
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 800)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 800)
+        
+        # Initialize tracking variables
+        self.calibrated = False
+        self.square_coords = {}
+        self.last_stable_state = None
+        self.running = False
+        
+        # Start tracking in a separate thread
+        self.running = True
+        self.tracking_thread = threading.Thread(target=self.runChessTracking)
+        self.tracking_thread.daemon = True  # Thread will exit when main program ends
+        self.tracking_thread.start()
+        
+        # Update status indicators
+        self.ui.chessboardStatusIndicator.setStyleSheet("background-color: #FFC107;") 
+        self.ui.gameStatusIndicator.setStyleSheet("background-color: #FFC107;")
+    
+    def runChessTracking(self):
+        """Run the chess tracking implementation in a separate thread."""
+        from implementation import model, track_pieces, calibrate_board, is_reachable_state
+        from implementation import save_move_to_csv_and_pgn, CONFIDENCE_THRESHOLD, frame_skip
+        import torch
+        import numpy as np
+        import cv2  # Add explicit cv2 import here
+        from PyQt6.QtCore import QBuffer, QIODevice, QByteArray
+        from PyQt6.QtGui import QImage
+        import time
+        
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        frame_count = 0
+        
+        while self.running:
+            ret, frame = self.cap.read()
+            if not ret:
+                continue
+                
+            frame_count += 1
+            if frame_count % frame_skip != 0:
+                continue
+                
+            # Resize frame
+            resized_frame = cv2.resize(frame, (800, 800))
+            
+            # Run inference
+            results = model(resized_frame)
+            
+            # Calibrate board if not calibrated
+            if not self.calibrated:
+                self.calibrated = calibrate_board(results)
+                if self.calibrated:
+                    self.ui.chessboardStatusIndicator.setStyleSheet("background-color: #4CAF50;")  # Green for calibrated
+            
+            # If calibrated, track pieces
+            if self.calibrated:
+                current_positions = track_pieces(results)
+                
+                # Add state to buffer and check for stable state
+                if self.state_buffer.add_state(current_positions):
+                    stable_state = self.state_buffer.current_stable_state
+                    
+                    # Process move if board state changed
+                    if self.last_stable_state is not None:
+                        if is_reachable_state(self.last_stable_state, stable_state):
+                            save_move_to_csv_and_pgn(self.last_stable_state, stable_state, self.pgn_recorder)
+                            self.ui.gameStatusIndicator.setStyleSheet("background-color: #4CAF50;")  # Green for active game
+                    
+                    self.last_stable_state = stable_state.copy()
+                    
+                    # Update chessboard display
+                    self.updateChessboardDisplay(stable_state)
+            
+            # Small delay to reduce CPU usage
+            time.sleep(0.01)
+    
+    def updateChessboardDisplay(self, board_state):
+        """Update the chessboard display using the implementation ChessDisplay."""
+        # Use implementation's ChessDisplay for SVG rendering
+        # This guarantees visual consistency with the implementation module
+        board_image = self.chess_display.update(board_state)
+        
+        # Convert OpenCV image to SVG via python-chess for consistent styling
+        import chess
+        import chess.svg
+        
+        # Create chess board from state
+        board = chess.Board()
+        board.clear()
+        for square, piece in board_state.items():
+            square_idx = chess.parse_square(square)
+            piece_obj = chess.Piece.from_symbol(piece)
+            board.set_piece_at(square_idx, piece_obj)
+        
+        # Generate SVG with the same styling as implementation.py uses
+        svg_content = chess.svg.board(
+            board=board, 
+            size=500,
+            coordinates=True,
+            colors={'square light': '#F0D9B5', 'square dark': '#B58863'}
+        )
+        
+        # Load SVG into widget
+        self.ui.chessboard.load(bytearray(svg_content, encoding='utf-8'))
+    
     def endGame(self):
-        """Close the ChessGameWindow and return to MainWindow."""
+        """Close the ChessGameWindow and save the game."""
+        from implementation import finalize_game
+        
+        # Stop tracking thread
+        self.running = False
+        if hasattr(self, 'tracking_thread'):
+            self.tracking_thread.join(timeout=1.0)
+        
+        # Release camera
+        if hasattr(self, 'cap') and self.cap.isOpened():
+            self.cap.release()
+        
+        # Save game results
+        if hasattr(self, 'pgn_recorder'):
+            finalize_game(self.pgn_recorder)
+        
+        # Close window
         self.close()
 
 class NewGame(QDialog):
@@ -89,7 +298,7 @@ class NewGame(QDialog):
         self.populate_cameras()
         
         # Connect buttons and validation
-        self.ui.proceedButton.clicked.connect(self.validateAndSave)
+        self.ui.startButton.clicked.connect(self.validateAndSave)
         self.ui.gameNameEdit.textChanged.connect(self.validateGameName)
         self.ui.whitePlayerEdit.textChanged.connect(self.validatePlayerName)
         self.ui.blackPlayerEdit.textChanged.connect(self.validatePlayerName)
@@ -101,7 +310,7 @@ class NewGame(QDialog):
         self.ui.cameraComboBox.clear()
         
         # Test cameras from index 0 to 99
-        for i in range(100):
+        for i in range(10):
             cap = cv.VideoCapture(i, cv.CAP_DSHOW)  # Use DirectShow on Windows
             if cap.isOpened():
                 # Get camera info
@@ -182,6 +391,7 @@ class NewGame(QDialog):
 
         # If all validations pass, save and accept
         self.saveGameDetails()
+        self.accept()  # Only accept after successful validation
 
     def saveGameDetails(self):
         """Save game details before closing"""
