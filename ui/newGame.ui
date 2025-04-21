@@ -151,7 +151,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="proceedButton">
+      <widget class="QPushButton" name="startButton">
        <property name="minimumSize">
         <size>
          <width>100</width>
@@ -159,7 +159,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Proceed</string>
+        <string>Start Game</string>
        </property>
       </widget>
      </item>
