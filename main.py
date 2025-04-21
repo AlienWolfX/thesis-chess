@@ -249,26 +249,23 @@ class ViewHistory(QDialog):
         self.current_move_index = 0
 
     def displayMatches(self):
-        """Display both CSV and PGN files from matches folder"""
+        """Display only PGN files from matches folder"""
         matches_folder = os.path.join(os.getcwd(), "matches")
         if os.path.exists(matches_folder):
             for file_name in os.listdir(matches_folder):
-                if file_name.endswith((".csv", ".pgn")):
+                if file_name.endswith(".pgn"):  # Only look for PGN files
                     item = QListWidgetItem(file_name)
-                    # Store file type as user data
-                    item.setData(Qt.ItemDataRole.UserRole, file_name.split('.')[-1])
                     self.ui.matchList.addItem(item)
 
     def loadMatch(self):
-        """Load and display moves from a CSV or PGN file"""
+        """Load and display moves from a PGN file"""
         fname, _ = QFileDialog.getOpenFileName(
             self,
             "Open File",
             os.path.expanduser("~"),
-            "Chess Files (*.csv *.pgn);;All Files (*)"
+            "Chess Games (*.pgn)"  # Only allow PGN files
         )
         if fname:
-            # Copy file to matches folder if it doesn't exist there
             matches_folder = os.path.join(os.getcwd(), "matches")
             if not os.path.exists(matches_folder):
                 os.makedirs(matches_folder)
@@ -276,41 +273,30 @@ class ViewHistory(QDialog):
             file_name = os.path.basename(fname)
             match_path = os.path.join(matches_folder, file_name)
             
-            # Copy file if it's not already in matches folder
             if fname != match_path:
                 import shutil
                 shutil.copy2(fname, match_path)
             
-            # Add to list and display moves
             item = QListWidgetItem(file_name)
-            item.setData(Qt.ItemDataRole.UserRole, file_name.split('.')[-1])
             self.ui.matchList.addItem(item)
             self.displayMatch(item)
 
     def displayMatch(self, item):
-        """Display moves from selected match (CSV or PGN)"""
+        """Display moves from selected PGN match"""
         if not item:
             return
             
         match_file = item.text()
-        file_type = item.data(Qt.ItemDataRole.UserRole)
         matches_folder = os.path.join(os.getcwd(), "matches")
         match_path = os.path.join(matches_folder, match_file)
         
         if os.path.exists(match_path):
             try:
-                if file_type == 'pgn':
-                    self.fetch_moves_from_pgn(match_path)
-                else:  # csv
-                    self.fetch_moves_from_csv(match_path)
-                    
+                self.fetch_moves_from_pgn(match_path)
                 self.display_moves_list()
                 
-                # Select first move
                 if self.ui.movesList.count() > 0:
                     self.ui.movesList.setCurrentRow(0)
-                    
-                print(f"Loaded {self.ui.movesList.count()} moves from {match_file}")
             except Exception as e:
                 QMessageBox.warning(self, "Error", f"Failed to load moves: {str(e)}")
 

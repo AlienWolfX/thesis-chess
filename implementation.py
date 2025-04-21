@@ -1,7 +1,6 @@
 import cv2
 import torch
 from ultralytics import YOLO
-from utils.chessFunctions import create_board_display
 import numpy as np
 from collections import deque
 from typing import Dict
@@ -36,9 +35,8 @@ HEIGHT = 800
 CONFIDENCE_THRESHOLD = 0.40
 BUFFER_SIZE = 8
 CONSENSUS_THRESHOLD = 0.4
-USE_CENTER_POINT = False
-SHOW_LIVE_WINDOW = True 
-ENABLE_RESOURCE_MONITORING = True
+SHOW_LIVE_WINDOW = False 
+ENABLE_RESOURCE_MONITORING = False
 gameName = datetime.now().strftime("%Y%m%d_%H%M")
 MOVES_FILE = f'matches/game_{gameName}_.csv'
 last_stable_state = None

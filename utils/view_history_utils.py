@@ -42,10 +42,9 @@ def load_pgn_moves(pgn_path):
                 san_move = node.san()
                 is_white = len(moves_data) % 2 == 0
                 moves_data.append({
-                    'Timestamp': game.headers.get('Date', ''),
                     'Move': san_move,
                     'Player': 'White' if is_white else 'Black',
-                    'MoveNumber': f"{move_number}{'.' if is_white else '...'}"
+                    'MoveNumber': f"{move_number}{'.' if is_white else ''}"
                 })
                 if not is_white:
                     move_number += 1
