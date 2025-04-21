@@ -290,13 +290,13 @@
       <item>
        <layout class="QVBoxLayout" name="rightLayout">
         <item>
-         <widget class="QGroupBox" name="player1Group">
+         <widget class="QGroupBox" name="player2Group">
           <property name="title">
-           <string>White Player</string>
+           <string>Black Player</string>
           </property>
           <layout class="QVBoxLayout" name="player1Layout">
            <item>
-            <widget class="QLineEdit" name="player1Name">
+            <widget class="QLineEdit" name="player2Name">
              <property name="styleSheet">
               <string notr="true">
                 padding: 1px;
@@ -312,7 +312,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QListView" name="player1listView">
+            <widget class="QListView" name="player2listView">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -341,13 +341,13 @@
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="player2Group">
+         <widget class="QGroupBox" name="player1Group">
           <property name="title">
-           <string>Black Player</string>
+           <string>White Player</string>
           </property>
           <layout class="QVBoxLayout" name="player2Layout">
            <item>
-            <widget class="QLineEdit" name="player2Name">
+            <widget class="QLineEdit" name="player1Name">
              <property name="styleSheet">
               <string notr="true">
                 padding: 1px;
@@ -363,7 +363,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QListView" name="player2listView">
+            <widget class="QListView" name="player1listView">
              <property name="minimumSize">
               <size>
                <width>0</width>

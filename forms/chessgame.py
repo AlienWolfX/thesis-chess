@@ -9,6 +9,7 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtSvgWidgets import QSvgWidget
 
+
 class Ui_ChessGameWindow(object):
     def setupUi(self, ChessGameWindow):
         ChessGameWindow.setObjectName("ChessGameWindow")
@@ -156,39 +157,10 @@ class Ui_ChessGameWindow(object):
         self.mainLayout.addLayout(self.leftLayout)
         self.rightLayout = QtWidgets.QVBoxLayout()
         self.rightLayout.setObjectName("rightLayout")
-        self.player1Group = QtWidgets.QGroupBox(parent=self.centralwidget)
-        self.player1Group.setObjectName("player1Group")
-        self.player1Layout = QtWidgets.QVBoxLayout(self.player1Group)
-        self.player1Layout.setObjectName("player1Layout")
-        self.player1Name = QtWidgets.QLineEdit(parent=self.player1Group)
-        self.player1Name.setStyleSheet("\n"
-"                padding: 1px;\n"
-"                font-size: 13px;\n"
-"                background: #f8f8f8;\n"
-"                border: 1px solid #ddd;\n"
-"                color: #333;\n"
-"              ")
-        self.player1Name.setReadOnly(True)
-        self.player1Name.setObjectName("player1Name")
-        self.player1Layout.addWidget(self.player1Name)
-        self.player1listView = QtWidgets.QListView(parent=self.player1Group)
-        self.player1listView.setMinimumSize(QtCore.QSize(0, 80))
-        self.player1listView.setMaximumSize(QtCore.QSize(16777215, 80))
-        self.player1listView.setStyleSheet("\n"
-"                QListView {\n"
-"                 background: #f8f8f8;\n"
-"                 border: 1px solid #ddd;\n"
-"                 border-radius: 2px;\n"
-"                 padding: 1px;\n"
-"                }\n"
-"              ")
-        self.player1listView.setObjectName("player1listView")
-        self.player1Layout.addWidget(self.player1listView)
-        self.rightLayout.addWidget(self.player1Group)
         self.player2Group = QtWidgets.QGroupBox(parent=self.centralwidget)
         self.player2Group.setObjectName("player2Group")
-        self.player2Layout = QtWidgets.QVBoxLayout(self.player2Group)
-        self.player2Layout.setObjectName("player2Layout")
+        self.player1Layout = QtWidgets.QVBoxLayout(self.player2Group)
+        self.player1Layout.setObjectName("player1Layout")
         self.player2Name = QtWidgets.QLineEdit(parent=self.player2Group)
         self.player2Name.setStyleSheet("\n"
 "                padding: 1px;\n"
@@ -199,7 +171,7 @@ class Ui_ChessGameWindow(object):
 "              ")
         self.player2Name.setReadOnly(True)
         self.player2Name.setObjectName("player2Name")
-        self.player2Layout.addWidget(self.player2Name)
+        self.player1Layout.addWidget(self.player2Name)
         self.player2listView = QtWidgets.QListView(parent=self.player2Group)
         self.player2listView.setMinimumSize(QtCore.QSize(0, 80))
         self.player2listView.setMaximumSize(QtCore.QSize(16777215, 80))
@@ -212,8 +184,37 @@ class Ui_ChessGameWindow(object):
 "                }\n"
 "              ")
         self.player2listView.setObjectName("player2listView")
-        self.player2Layout.addWidget(self.player2listView)
+        self.player1Layout.addWidget(self.player2listView)
         self.rightLayout.addWidget(self.player2Group)
+        self.player1Group = QtWidgets.QGroupBox(parent=self.centralwidget)
+        self.player1Group.setObjectName("player1Group")
+        self.player2Layout = QtWidgets.QVBoxLayout(self.player1Group)
+        self.player2Layout.setObjectName("player2Layout")
+        self.player1Name = QtWidgets.QLineEdit(parent=self.player1Group)
+        self.player1Name.setStyleSheet("\n"
+"                padding: 1px;\n"
+"                font-size: 13px;\n"
+"                background: #f8f8f8;\n"
+"                border: 1px solid #ddd;\n"
+"                color: #333;\n"
+"              ")
+        self.player1Name.setReadOnly(True)
+        self.player1Name.setObjectName("player1Name")
+        self.player2Layout.addWidget(self.player1Name)
+        self.player1listView = QtWidgets.QListView(parent=self.player1Group)
+        self.player1listView.setMinimumSize(QtCore.QSize(0, 80))
+        self.player1listView.setMaximumSize(QtCore.QSize(16777215, 80))
+        self.player1listView.setStyleSheet("\n"
+"                QListView {\n"
+"                 background: #f8f8f8;\n"
+"                 border: 1px solid #ddd;\n"
+"                 border-radius: 2px;\n"
+"                 padding: 1px;\n"
+"                }\n"
+"              ")
+        self.player1listView.setObjectName("player1listView")
+        self.player2Layout.addWidget(self.player1listView)
+        self.rightLayout.addWidget(self.player1Group)
         self.endButton = QtWidgets.QPushButton(parent=self.centralwidget)
         self.endButton.setStyleSheet("\n"
 "             QPushButton {\n"
@@ -247,6 +248,6 @@ class Ui_ChessGameWindow(object):
         self.statusGroup.setTitle(_translate("ChessGameWindow", "Status Indicators"))
         self.chessboardStatusLabel.setText(_translate("ChessGameWindow", "Chessboard Mapped"))
         self.gameStatusLabel.setText(_translate("ChessGameWindow", "Game Active"))
-        self.player1Group.setTitle(_translate("ChessGameWindow", "White Player"))
         self.player2Group.setTitle(_translate("ChessGameWindow", "Black Player"))
+        self.player1Group.setTitle(_translate("ChessGameWindow", "White Player"))
         self.endButton.setText(_translate("ChessGameWindow", "End Game"))

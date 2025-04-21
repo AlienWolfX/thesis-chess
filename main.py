@@ -277,12 +277,18 @@ class ChessGameWindow(QMainWindow):
         self.ui.chessboard.load(bytearray(svg_content, encoding='utf-8'))
     
     def addMoveToListView(self, color, move):
+        item = QtGui.QStandardItem(move)
+        item.setForeground(QtGui.QColor("black"))  # Set text color to black
+
+        # Set font size larger (e.g., 14pt)
+        font = item.font()
+        font.setPointSize(16)
+        item.setFont(font)
+
         if color == "White":
-            item = QtGui.QStandardItem(move)
             self.white_moves_model.appendRow(item)
             self.ui.player1listView.scrollToBottom()
         else:
-            item = QtGui.QStandardItem(move)
             self.black_moves_model.appendRow(item)
             self.ui.player2listView.scrollToBottom()
     

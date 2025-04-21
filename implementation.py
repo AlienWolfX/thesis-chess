@@ -58,6 +58,11 @@ class_id_mapping = {
     'White-Rook': 'R',
 }
 
+# Add these globals at the top (or manage as class members if you refactor)
+last_known_positions = {}
+missing_counter = {}
+MISSING_TOLERANCE = 6  # Number of frames to tolerate missing detection
+
 def ensure_directories():
     """Ensure required directories exist"""
     os.makedirs("matches", exist_ok=True)
@@ -377,26 +382,51 @@ class_confidence_thresholds = {
 }
 
 def track_pieces(results):
-    current_positions = {}
+    global last_known_positions, missing_counter
+
+    detected_positions = {}
+    detected_squares = set()
     for result in results:
         for box in result.boxes:
             if box.conf[0] < CONFIDENCE_THRESHOLD:
                 continue
-                
+
             x1, y1, x2, y2 = box.xyxy[0].tolist()
             x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
             piece_point = get_piece_point(x1, y1, x2, y2)
             piece_label = model.names[int(box.cls)]
-            
+
             # Vectorized distance calculation
             coords = np.array(list(square_coords.values()))
             distances = np.sqrt(np.sum((coords - np.array(piece_point))**2, axis=1))
             min_distance = np.min(distances)
             if min_distance < 50:
                 closest_square = list(square_coords.keys())[np.argmin(distances)]
-                current_positions[closest_square] = class_id_mapping[piece_label]
-    
-    return current_positions
+                detected_positions[closest_square] = class_id_mapping[piece_label]
+                detected_squares.add(closest_square)
+
+    # Update missing counters and fill in from last known if within tolerance
+    updated_positions = detected_positions.copy()
+    for square in square_coords.keys():
+        if square in detected_positions:
+            missing_counter[square] = 0
+        else:
+            # If previously known, increment missing counter
+            if square in last_known_positions:
+                missing_counter[square] = missing_counter.get(square, 0) + 1
+                if missing_counter[square] <= MISSING_TOLERANCE:
+                    # Use last known piece if within tolerance
+                    updated_positions[square] = last_known_positions[square]
+                else:
+                    # Remove after tolerance exceeded
+                    if square in updated_positions:
+                        del updated_positions[square]
+            else:
+                missing_counter[square] = 0  # Not seen before
+
+    # Update last known positions
+    last_known_positions = updated_positions.copy()
+    return updated_positions
 
 def is_reachable_state(old_state: Dict[str, str], new_state: Dict[str, str], max_moves: int = 2) -> bool:
     """
