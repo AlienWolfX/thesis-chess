@@ -179,7 +179,7 @@
               <string notr="true">font-size: 12px; color: #666;</string>
              </property>
              <property name="text">
-              <string>Chessboard Connected</string>
+              <string>Chessboard Mapped</string>
              </property>
             </widget>
            </item>

@@ -9,7 +9,6 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtSvgWidgets import QSvgWidget
 
-
 class Ui_ChessGameWindow(object):
     def setupUi(self, ChessGameWindow):
         ChessGameWindow.setObjectName("ChessGameWindow")
@@ -246,7 +245,7 @@ class Ui_ChessGameWindow(object):
         self.roundLabel.setText(_translate("ChessGameWindow", "Round: "))
         self.siteLabel.setText(_translate("ChessGameWindow", "Site: "))
         self.statusGroup.setTitle(_translate("ChessGameWindow", "Status Indicators"))
-        self.chessboardStatusLabel.setText(_translate("ChessGameWindow", "Chessboard Connected"))
+        self.chessboardStatusLabel.setText(_translate("ChessGameWindow", "Chessboard Mapped"))
         self.gameStatusLabel.setText(_translate("ChessGameWindow", "Game Active"))
         self.player1Group.setTitle(_translate("ChessGameWindow", "White Player"))
         self.player2Group.setTitle(_translate("ChessGameWindow", "Black Player"))
