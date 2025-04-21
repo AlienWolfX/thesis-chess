@@ -20,6 +20,7 @@ import psutil
 import threading
 import time
 from time import perf_counter
+from threading import Lock
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -27,15 +28,17 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 model = YOLO('model/v29.pt').to(device)
 cameraSrc = 0 
 cap = cv2.VideoCapture(cameraSrc)
-frame_skip = 2 
+frame_skip = 3
 frame_count = 0
+WIDTH = 800
+HEIGHT = 800
 
 CONFIDENCE_THRESHOLD = 0.40
 BUFFER_SIZE = 8
 CONSENSUS_THRESHOLD = 0.4
 USE_CENTER_POINT = False
 SHOW_LIVE_WINDOW = True 
-ENABLE_RESOURCE_MONITORING = False
+ENABLE_RESOURCE_MONITORING = True
 gameName = datetime.now().strftime("%Y%m%d_%H%M")
 MOVES_FILE = f'matches/game_{gameName}_.csv'
 last_stable_state = None
@@ -186,6 +189,39 @@ class ResourceMonitor:
             except Exception as e:
                 print(f"Error monitoring resources: {e}")
                 break
+
+class ChessDisplay:
+    def __init__(self, size=800):
+        self.size = size
+        self.current_state = None
+        self.cached_image = None
+        self.display_lock = Lock()
+        
+    def update(self, board_state):
+        """Thread-safe update with double buffering"""
+        if board_state == self.current_state:
+            return self.cached_image
+            
+        with self.display_lock:
+            # Create new image in background
+            board = chess.Board()
+            board.clear()
+            
+            for square, piece in board_state.items():
+                square_idx = chess.parse_square(square)
+                piece_obj = chess.Piece.from_symbol(piece)
+                board.set_piece_at(square_idx, piece_obj)
+            
+            svg_content = chess.svg.board(board=board, size=self.size)
+            png_data = cairosvg.svg2png(bytestring=svg_content.encode('utf-8'))
+            image = Image.open(io.BytesIO(png_data))
+            new_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGBA2BGR)
+            
+            # Swap buffers
+            self.cached_image = new_image
+            self.current_state = board_state.copy() if board_state else None
+            
+        return self.cached_image
 
 def get_piece_point(x1: int, y1: int, x2: int, y2: int, is_rook_calibration: bool = False) -> tuple:
     """
@@ -338,6 +374,10 @@ def draw_grid(frame, square_coords):
             cv2.putText(frame, label, (point[0]-10, point[1]+20),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1)
                 
+class_confidence_thresholds = {
+    'Black-King': 0.7  # Higher confidence threshold for Black King
+}
+
 def track_pieces(results):
     current_positions = {}
     for result in results:
@@ -350,19 +390,13 @@ def track_pieces(results):
             piece_point = get_piece_point(x1, y1, x2, y2)
             piece_label = model.names[int(box.cls)]
             
-            # Find closest square using piece point
-            closest_square = None
-            min_distance = float('inf')
-            for square, coord in square_coords.items():
-                distance = np.sqrt((piece_point[0] - coord[0])**2 + 
-                                 (piece_point[1] - coord[1])**2)
-                if distance < min_distance:
-                    min_distance = distance
-                    closest_square = square
-            
-            if closest_square and min_distance < 50: 
+            # Vectorized distance calculation
+            coords = np.array(list(square_coords.values()))
+            distances = np.sqrt(np.sum((coords - np.array(piece_point))**2, axis=1))
+            min_distance = np.min(distances)
+            if min_distance < 50:
+                closest_square = list(square_coords.keys())[np.argmin(distances)]
                 current_positions[closest_square] = class_id_mapping[piece_label]
-                print(f'{piece_label} detected at {closest_square}')
     
     return current_positions
 
@@ -494,33 +528,6 @@ def finalize_game(pgn_recorder: PGNRecorder, result: str = "*") -> None:
     except Exception as e:
         print(f"Error saving files: {e}")
 
-def create_board_display_svg(board_state):
-    """Create an SVG-based chess board visualization"""
-    # Create a new chess board
-    board = chess.Board()
-    board.clear()  # Clear all pieces
-    
-    # Place pieces according to current state
-    for square, piece in board_state.items():
-        # Convert square name to chess.Square index
-        square_idx = chess.parse_square(square)
-        # Convert piece symbol to chess.Piece
-        piece_obj = chess.Piece.from_symbol(piece)
-        # Set piece on board
-        board.set_piece_at(square_idx, piece_obj)
-    
-    # Generate SVG
-    svg_content = chess.svg.board(board=board, size=800)
-    
-    # Convert SVG to PNG using cairosvg
-    png_data = cairosvg.svg2png(bytestring=svg_content.encode('utf-8'))
-    
-    # Convert PNG to numpy array for OpenCV display
-    image = Image.open(io.BytesIO(png_data))
-    opencv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGBA2BGR)
-    
-    return opencv_image
-
 def reset_calibration():
     """Reset calibration state and related variables"""
     global calibrated, square_coords, last_stable_state
@@ -549,6 +556,9 @@ if ENABLE_RESOURCE_MONITORING:
     resource_monitor = ResourceMonitor(interval=1.0)
     resource_monitor.start()
 
+# Initialize ChessDisplay
+chess_display = ChessDisplay(size=800)
+
 while True:
     frame_start = perf_counter()
     ret, frame = cap.read()
@@ -559,7 +569,8 @@ while True:
     if frame_count % frame_skip != 0:
         continue
 
-    resized_frame = cv2.resize(frame, (800, 800))  # 1080p resolution
+    resized_frame = cv2.resize(frame, (WIDTH, HEIGHT), 
+                             interpolation=cv2.INTER_AREA)
     
     # Measure inference time
     inference_start = perf_counter()
@@ -593,12 +604,11 @@ while True:
             if last_stable_state is not None:
                 save_move_to_csv_and_pgn(last_stable_state, stable_state, pgn_recorder)
             last_stable_state = stable_state.copy()
-            
-        if state_buffer.current_stable_state:
-            board_vis = create_board_display_svg(state_buffer.current_stable_state)
-        else:
-            board_vis = create_board_display_svg(current_positions)
-            
+        
+        # Use cached display update
+        display_state = state_buffer.current_stable_state if state_buffer.current_stable_state else current_positions
+        board_vis = chess_display.update(display_state)
+        
         # Position the board window
         cv2.namedWindow('Chess Board', cv2.WINDOW_NORMAL)
         cv2.resizeWindow('Chess Board', 800, 800)
