@@ -18,9 +18,21 @@
     <normaloff>../img/app.ico</normaloff>../img/app.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <property name="styleSheet">
+    <string notr="true">background-color: #f5f5f5;</string>
+   </property>
+   <layout class="QVBoxLayout" name="mainLayout">
+    <property name="spacing">
+     <number>20</number>
+    </property>
     <item>
      <widget class="QLabel" name="appName">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="font">
        <font>
         <family>Segoe UI Semibold</family>
@@ -28,6 +40,9 @@
         <weight>75</weight>
         <bold>true</bold>
        </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: #2c3e50; padding: 30px;</string>
       </property>
       <property name="text">
        <string>RookEye.ph</string>
@@ -38,20 +53,50 @@
      </widget>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QVBoxLayout" name="buttonLayout">
+      <property name="spacing">
+       <number>15</number>
+      </property>
+      <property name="leftMargin">
+       <number>50</number>
+      </property>
+      <property name="topMargin">
+       <number>50</number>
+      </property>
+      <property name="rightMargin">
+       <number>50</number>
+      </property>
+      <property name="bottomMargin">
+       <number>50</number>
+      </property>
       <item>
        <widget class="QPushButton" name="newGame">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>24</height>
+          <height>50</height>
          </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>14</pointsize>
+          <weight>60</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">
+                    QPushButton {
+                      background-color: #3498db;
+                      color: white;
+                      border-radius: 5px;
+                      padding: 10px;
+                    }
+                    QPushButton:hover {
+                      background-color: #2980b9;
+                    }
+                  </string>
         </property>
         <property name="text">
          <string>New Game</string>
@@ -60,11 +105,32 @@
       </item>
       <item>
        <widget class="QPushButton" name="viewHistory">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>50</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>14</pointsize>
+          <weight>60</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">
+                    QPushButton {
+                      background-color: #2ecc71;
+                      color: white;
+                      border-radius: 5px;
+                      padding: 10px;
+                    }
+                    QPushButton:hover {
+                      background-color: #27ae60;
+                    }
+                  </string>
         </property>
         <property name="text">
          <string>View History</string>
@@ -84,46 +150,103 @@
      <height>21</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">
+          QMenuBar {
+            background-color: #34495e;
+            color: white;
+          }
+          QMenuBar::item {
+            background-color: transparent;
+            color: white;
+          }
+          QMenuBar::item:selected {
+            background-color: #2c3e50;
+          }
+          QMenu {
+            background-color: #34495e;
+            color: white;
+            border: 1px solid #2c3e50;
+          }
+          QMenu::item:selected {
+            background-color: #2c3e50;
+          }
+        </string>
+   </property>
    <widget class="QMenu" name="menuMenu">
     <property name="title">
      <string>File</string>
     </property>
     <addaction name="actionNew_Game"/>
     <addaction name="separator"/>
+    <addaction name="actionOpen_CSV"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>Help</string>
     </property>
     <addaction name="actionAbout"/>
+    <addaction name="actionReport_Issue"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionReport_Issue">
-   <property name="text">
-    <string>Report Issue</string>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="styleSheet">
+    <string notr="true">background-color: #ecf0f1; color: #2c3e50;</string>
    </property>
-  </action>
-  <action name="actionAbout">
-   <property name="text">
-    <string>About</string>
-   </property>
-  </action>
+  </widget>
   <action name="actionNew_Game">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../../Downloads/Compressed/fugue-icons-3.5.6-src/icons/new.png</normaloff>../../../../../Downloads/Compressed/fugue-icons-3.5.6-src/icons/new.png</iconset>
+   </property>
    <property name="text">
     <string>New Game</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
   <action name="actionExport_to_CSV">
    <property name="text">
     <string>Export to CSV</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
+   </property>
   </action>
   <action name="actionOpen_CSV">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../../Downloads/Compressed/fugue-icons-3.5.6-src/icons/blue-folder-open-feed.png</normaloff>../../../../../Downloads/Compressed/fugue-icons-3.5.6-src/icons/blue-folder-open-feed.png</iconset>
+   </property>
    <property name="text">
     <string>Open CSV</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../../Downloads/Compressed/fugue-icons-3.5.6-src/icons/question-button.png</normaloff>../../../../../Downloads/Compressed/fugue-icons-3.5.6-src/icons/question-button.png</iconset>
+   </property>
+   <property name="text">
+    <string>About</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
+  </action>
+  <action name="actionReport_Issue">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../../Downloads/Compressed/fugue-icons-3.5.6-src/icons/report-image.png</normaloff>../../../../../Downloads/Compressed/fugue-icons-3.5.6-src/icons/report-image.png</iconset>
+   </property>
+   <property name="text">
+    <string>Report Issue</string>
    </property>
   </action>
  </widget>

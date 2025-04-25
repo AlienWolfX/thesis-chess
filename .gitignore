@@ -13,6 +13,7 @@ training_ipynb/*
 3d_Stuff/*
 model/old/*
 3d_new/*
+test/*
 
 
 # Development files that should not be in the repo

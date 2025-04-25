@@ -12,69 +12,187 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_viewHistory(object):
     def setupUi(self, viewHistory):
         viewHistory.setObjectName("viewHistory")
-        viewHistory.resize(1000, 700)
-        viewHistory.setMinimumSize(QtCore.QSize(800, 600))
+        viewHistory.resize(1200, 800)
+        viewHistory.setMinimumSize(QtCore.QSize(1200, 800))
+        viewHistory.setMaximumSize(QtCore.QSize(1200, 800))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("ui\\../img/app.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         viewHistory.setWindowIcon(icon)
+        viewHistory.setStyleSheet("QDialog { \n"
+"    background-color: #f5f5f5;\n"
+"    font-family: \'Segoe UI\', Arial, sans-serif;\n"
+"   }")
         self.gridLayout = QtWidgets.QGridLayout(viewHistory)
+        self.gridLayout.setContentsMargins(20, 20, 20, 20)
+        self.gridLayout.setSpacing(15)
         self.gridLayout.setObjectName("gridLayout")
-        self.groupBox_2 = QtWidgets.QGroupBox(parent=viewHistory)
-        self.groupBox_2.setObjectName("groupBox_2")
-        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.groupBox_2)
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.movesList = QtWidgets.QListWidget(parent=self.groupBox_2)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
-        sizePolicy.setHorizontalStretch(1)
-        sizePolicy.setVerticalStretch(2)
-        sizePolicy.setHeightForWidth(self.movesList.sizePolicy().hasHeightForWidth())
-        self.movesList.setSizePolicy(sizePolicy)
-        self.movesList.setMinimumSize(QtCore.QSize(250, 200))
-        self.movesList.setObjectName("movesList")
-        self.verticalLayout_2.addWidget(self.movesList)
-        self.gridLayout.addWidget(self.groupBox_2, 1, 1, 1, 1)
         self.groupBox = QtWidgets.QGroupBox(parent=viewHistory)
+        self.groupBox.setStyleSheet("\n"
+"       QGroupBox {\n"
+"         font-family: \'Segoe UI\';\n"
+"         font-weight: bold;\n"
+"         font-size: 12pt;\n"
+"         color: #2c3e50;\n"
+"         border: 1px solid #d6d6d6;\n"
+"         border-radius: 5px;\n"
+"         margin-top: 20px;\n"
+"         padding: 15px;\n"
+"       }\n"
+"       QGroupBox::title {\n"
+"         subcontrol-origin: margin;\n"
+"         left: 10px;\n"
+"         padding: 0 5px;\n"
+"       }\n"
+"       QListWidget {\n"
+"         background-color: #ffffff;\n"
+"         color: #000000;\n"
+"         border: 1px solid #d6d6d6;\n"
+"         border-radius: 4px;\n"
+"         padding: 5px;\n"
+"         font-family: \'Segoe UI\';\n"
+"         font-size: 11pt;\n"
+"       }\n"
+"       QListWidget::item:selected {\n"
+"         background-color: #3498db;\n"
+"         color: #ffffff;\n"
+"       }\n"
+"       QListWidget::item:hover {\n"
+"         background-color: #ecf0f1;\n"
+"       }\n"
+"      ")
         self.groupBox.setObjectName("groupBox")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.groupBox)
         self.verticalLayout.setObjectName("verticalLayout")
         self.matchList = QtWidgets.QListWidget(parent=self.groupBox)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
-        sizePolicy.setHorizontalStretch(1)
-        sizePolicy.setVerticalStretch(1)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.matchList.sizePolicy().hasHeightForWidth())
         self.matchList.setSizePolicy(sizePolicy)
-        self.matchList.setMinimumSize(QtCore.QSize(250, 150))
+        self.matchList.setMinimumSize(QtCore.QSize(300, 125))
+        self.matchList.setMaximumSize(QtCore.QSize(500, 16777215))
+        self.matchList.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.matchList.setObjectName("matchList")
         self.verticalLayout.addWidget(self.matchList)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.loadButton = QtWidgets.QPushButton(parent=self.groupBox)
+        self.loadButton.setMinimumSize(QtCore.QSize(120, 40))
+        self.loadButton.setStyleSheet("\n"
+"            QPushButton {\n"
+"              background-color: #3498db;\n"
+"              color: white;\n"
+"              border-radius: 4px;\n"
+"              padding: 8px 16px;\n"
+"              font-family: \'Segoe UI\';\n"
+"              font-weight: bold;\n"
+"              font-size: 12pt;\n"
+"            }\n"
+"            QPushButton:hover {\n"
+"              background-color: #2980b9;\n"
+"            }\n"
+"           ")
         self.loadButton.setObjectName("loadButton")
         self.horizontalLayout.addWidget(self.loadButton)
         self.resetButton = QtWidgets.QPushButton(parent=self.groupBox)
+        self.resetButton.setMinimumSize(QtCore.QSize(120, 40))
+        self.resetButton.setStyleSheet("\n"
+"            QPushButton {\n"
+"              background-color: #e74c3c;\n"
+"              color: white;\n"
+"              border-radius: 4px;\n"
+"              padding: 8px 16px;\n"
+"              font-family: \'Segoe UI\';\n"
+"              font-weight: bold;\n"
+"              font-size: 12pt;\n"
+"            }\n"
+"            QPushButton:hover {\n"
+"              background-color: #c0392b;\n"
+"            }\n"
+"           ")
         self.resetButton.setObjectName("resetButton")
         self.horizontalLayout.addWidget(self.resetButton)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.gridLayout.addWidget(self.groupBox, 0, 1, 1, 1)
-        self.chessOutput = QtWidgets.QLabel(parent=viewHistory)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
+        self.groupBox_2 = QtWidgets.QGroupBox(parent=viewHistory)
+        self.groupBox_2.setStyleSheet("\n"
+"       QGroupBox {\n"
+"         font-family: \'Segoe UI\';\n"
+"         font-weight: bold;\n"
+"         font-size: 12pt;\n"
+"         color: #2c3e50;\n"
+"         border: 1px solid #d6d6d6;\n"
+"         border-radius: 5px;\n"
+"         margin-top: 20px;\n"
+"         padding: 15px;\n"
+"       }\n"
+"       QGroupBox::title {\n"
+"         subcontrol-origin: margin;\n"
+"         left: 10px;\n"
+"         padding: 0 5px;\n"
+"       }\n"
+"       QListWidget {\n"
+"         background-color: #ffffff;\n"
+"         color: #000000;\n"
+"         border: 1px solid #d6d6d6;\n"
+"         border-radius: 4px;\n"
+"         padding: 5px;\n"
+"         font-family: \'Segoe UI\';\n"
+"         font-size: 11pt;\n"
+"       }\n"
+"       QListWidget::item:selected {\n"
+"         background-color: #3498db;\n"
+"         color: #ffffff;\n"
+"       }\n"
+"       QListWidget::item:hover {\n"
+"         background-color: #ecf0f1;\n"
+"       }\n"
+"      ")
+        self.groupBox_2.setObjectName("groupBox_2")
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.groupBox_2)
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.movesList = QtWidgets.QListWidget(parent=self.groupBox_2)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.chessOutput.sizePolicy().hasHeightForWidth())
-        self.chessOutput.setSizePolicy(sizePolicy)
-        self.chessOutput.setMinimumSize(QtCore.QSize(600, 600))
-        self.chessOutput.setMaximumSize(QtCore.QSize(600, 600))
-        self.chessOutput.setStyleSheet("background-color: white; border: 1px solid gray;")
-        self.chessOutput.setText("")
-        self.chessOutput.setObjectName("chessOutput")
-        self.gridLayout.addWidget(self.chessOutput, 0, 0, 5, 1)
-        self.returnButton = QtWidgets.QPushButton(parent=viewHistory)
-        self.returnButton.setMinimumSize(QtCore.QSize(100, 30))
-        self.returnButton.setObjectName("returnButton")
-        self.gridLayout.addWidget(self.returnButton, 4, 1, 1, 1, QtCore.Qt.AlignmentFlag.AlignRight)
-        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding)
-        self.gridLayout.addItem(spacerItem, 3, 1, 1, 1)
+        sizePolicy.setHeightForWidth(self.movesList.sizePolicy().hasHeightForWidth())
+        self.movesList.setSizePolicy(sizePolicy)
+        self.movesList.setMinimumSize(QtCore.QSize(300, 125))
+        self.movesList.setMaximumSize(QtCore.QSize(500, 16777215))
+        self.movesList.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.movesList.setObjectName("movesList")
+        self.verticalLayout_2.addWidget(self.movesList)
+        self.gridLayout.addWidget(self.groupBox_2, 1, 1, 1, 1)
         self.groupBox_3 = QtWidgets.QGroupBox(parent=viewHistory)
+        self.groupBox_3.setStyleSheet("\n"
+"       QGroupBox {\n"
+"         font-family: \'Segoe UI\';\n"
+"         font-weight: bold;\n"
+"         font-size: 12pt;\n"
+"         color: #2c3e50;\n"
+"         border: 1px solid #d6d6d6;\n"
+"         border-radius: 5px;\n"
+"         margin-top: 20px;\n"
+"         padding: 15px;\n"
+"       }\n"
+"       QGroupBox::title {\n"
+"         subcontrol-origin: margin;\n"
+"         left: 10px;\n"
+"         padding: 0 5px;\n"
+"       }\n"
+"       QLabel {\n"
+"         color: #000000;\n"
+"         font-family: \'Segoe UI\';\n"
+"         font-size: 11pt;\n"
+"         font-weight: normal;\n"
+"       }\n"
+"       QLabel[frameShape=\"Panel\"] {\n"
+"         background-color: #ffffff;\n"
+"         border: 1px solid #d6d6d6;\n"
+"         border-radius: 4px;\n"
+"         padding: 5px;\n"
+"       }\n"
+"      ")
         self.groupBox_3.setObjectName("groupBox_3")
         self.formLayout = QtWidgets.QFormLayout(self.groupBox_3)
         self.formLayout.setObjectName("formLayout")
@@ -111,19 +229,37 @@ class Ui_viewHistory(object):
         self.labelDate.setObjectName("labelDate")
         self.formLayout.setWidget(3, QtWidgets.QFormLayout.ItemRole.SpanningRole, self.labelDate)
         self.gridLayout.addWidget(self.groupBox_3, 2, 1, 1, 1)
+        self.chessOutput = QtWidgets.QLabel(parent=viewHistory)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.chessOutput.sizePolicy().hasHeightForWidth())
+        self.chessOutput.setSizePolicy(sizePolicy)
+        self.chessOutput.setMinimumSize(QtCore.QSize(600, 600))
+        self.chessOutput.setMaximumSize(QtCore.QSize(600, 600))
+        self.chessOutput.setStyleSheet("background-color: white; border: 1px solid gray;")
+        self.chessOutput.setText("")
+        self.chessOutput.setObjectName("chessOutput")
+        self.gridLayout.addWidget(self.chessOutput, 0, 0, 5, 1)
+        self.returnButton = QtWidgets.QPushButton(parent=viewHistory)
+        self.returnButton.setMinimumSize(QtCore.QSize(100, 30))
+        self.returnButton.setObjectName("returnButton")
+        self.gridLayout.addWidget(self.returnButton, 4, 1, 1, 1, QtCore.Qt.AlignmentFlag.AlignRight)
+        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding)
+        self.gridLayout.addItem(spacerItem, 3, 1, 1, 1)
 
         self.retranslateUi(viewHistory)
         QtCore.QMetaObject.connectSlotsByName(viewHistory)
 
     def retranslateUi(self, viewHistory):
         _translate = QtCore.QCoreApplication.translate
-        viewHistory.setWindowTitle(_translate("viewHistory", "History"))
-        self.groupBox_2.setTitle(_translate("viewHistory", "Moves List"))
+        viewHistory.setWindowTitle(_translate("viewHistory", "Match History"))
         self.groupBox.setTitle(_translate("viewHistory", "Saved Matches"))
-        self.loadButton.setText(_translate("viewHistory", "Load Match"))
+        self.loadButton.setText(_translate("viewHistory", "Load Matches"))
         self.resetButton.setText(_translate("viewHistory", "Reset"))
-        self.returnButton.setText(_translate("viewHistory", "Return"))
+        self.groupBox_2.setTitle(_translate("viewHistory", "Moves List"))
         self.groupBox_3.setTitle(_translate("viewHistory", "Game Information"))
         self.labelGameNo.setText(_translate("viewHistory", "Game Number:"))
         self.labelWhite.setText(_translate("viewHistory", "White Player:"))
         self.labelBlack.setText(_translate("viewHistory", "Black Player:"))
+        self.returnButton.setText(_translate("viewHistory", "Return"))

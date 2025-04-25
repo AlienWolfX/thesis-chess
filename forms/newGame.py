@@ -12,66 +12,164 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_newGame(object):
     def setupUi(self, newGame):
         newGame.setObjectName("newGame")
-        newGame.resize(450, 400)
-        newGame.setMinimumSize(QtCore.QSize(400, 350))
+        newGame.resize(500, 516)
+        newGame.setMinimumSize(QtCore.QSize(450, 400))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("ui\\../img/app.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         newGame.setWindowIcon(icon)
+        newGame.setStyleSheet("QDialog { background-color: #f5f7fa; font-family: \'Segoe UI\', Arial, sans-serif; }")
         self.verticalLayout = QtWidgets.QVBoxLayout(newGame)
+        self.verticalLayout.setContentsMargins(20, 20, 20, 20)
+        self.verticalLayout.setSpacing(15)
         self.verticalLayout.setObjectName("verticalLayout")
         self.groupBox = QtWidgets.QGroupBox(parent=newGame)
+        self.groupBox.setStyleSheet("QGroupBox {\n"
+"    font-weight: bold;\n"
+"    font-size: 12pt;\n"
+"    color: #2c3e50;\n"
+"    border: 1px solid #d6d6d6;\n"
+"    border-radius: 5px;\n"
+"    margin-top: 20px;\n"
+"}\n"
+"QGroupBox::title {\n"
+"    subcontrol-origin: margin;\n"
+"    left: 10px;\n"
+"    padding: 0 5px;\n"
+"}")
         self.groupBox.setObjectName("groupBox")
         self.formLayout = QtWidgets.QFormLayout(self.groupBox)
+        self.formLayout.setRowWrapPolicy(QtWidgets.QFormLayout.RowWrapPolicy.WrapAllRows)
+        self.formLayout.setSpacing(12)
         self.formLayout.setObjectName("formLayout")
         self.label = QtWidgets.QLabel(parent=self.groupBox)
-        self.label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.label.setStyleSheet("color: #34495e;")
         self.label.setObjectName("label")
         self.formLayout.setWidget(0, QtWidgets.QFormLayout.ItemRole.LabelRole, self.label)
         self.gameNameEdit = QtWidgets.QLineEdit(parent=self.groupBox)
+        self.gameNameEdit.setStyleSheet("\n"
+"          QLineEdit {\n"
+"            padding: 6px;\n"
+"            border: 1px solid #d6d6d6;\n"
+"            border-radius: 3px;\n"
+"            background-color:rgb(255, 255, 255);\n"
+"            color:rgb(0, 0, 0);\n"
+"          }\n"
+"          QLineEdit::placeholder {\n"
+"            color: #95a5a6;\n"
+"          }\n"
+"         ")
         self.gameNameEdit.setObjectName("gameNameEdit")
         self.formLayout.setWidget(0, QtWidgets.QFormLayout.ItemRole.FieldRole, self.gameNameEdit)
         self.label_4 = QtWidgets.QLabel(parent=self.groupBox)
-        self.label_4.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.label_4.setStyleSheet("color: #34495e;")
         self.label_4.setObjectName("label_4")
         self.formLayout.setWidget(1, QtWidgets.QFormLayout.ItemRole.LabelRole, self.label_4)
         self.siteEdit = QtWidgets.QLineEdit(parent=self.groupBox)
+        self.siteEdit.setStyleSheet("\n"
+"          QLineEdit {\n"
+"            padding: 6px;\n"
+"            border: 1px solid #d6d6d6;\n"
+"            border-radius: 3px;\n"
+"            background-color:rgb(255, 255, 255);\n"
+"            color:rgb(0, 0, 0);\n"
+"          }\n"
+"          QLineEdit::placeholder {\n"
+"            color: #95a5a6;\n"
+"          }\n"
+"         ")
         self.siteEdit.setObjectName("siteEdit")
         self.formLayout.setWidget(1, QtWidgets.QFormLayout.ItemRole.FieldRole, self.siteEdit)
         self.label_5 = QtWidgets.QLabel(parent=self.groupBox)
-        self.label_5.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.label_5.setStyleSheet("color: #34495e;")
         self.label_5.setObjectName("label_5")
         self.formLayout.setWidget(2, QtWidgets.QFormLayout.ItemRole.LabelRole, self.label_5)
         self.roundEdit = QtWidgets.QLineEdit(parent=self.groupBox)
+        self.roundEdit.setStyleSheet("\n"
+"          QLineEdit {\n"
+"            padding: 6px;\n"
+"            border: 1px solid #d6d6d6;\n"
+"            border-radius: 3px;\n"
+"            background-color:rgb(255, 255, 255);\n"
+"            color:rgb(0, 0, 0);\n"
+"          }\n"
+"          QLineEdit::placeholder {\n"
+"            color: #95a5a6;\n"
+"          }\n"
+"         ")
         self.roundEdit.setObjectName("roundEdit")
         self.formLayout.setWidget(2, QtWidgets.QFormLayout.ItemRole.FieldRole, self.roundEdit)
         self.label_2 = QtWidgets.QLabel(parent=self.groupBox)
-        self.label_2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.label_2.setStyleSheet("color: #34495e;")
         self.label_2.setObjectName("label_2")
         self.formLayout.setWidget(3, QtWidgets.QFormLayout.ItemRole.LabelRole, self.label_2)
         self.whitePlayerEdit = QtWidgets.QLineEdit(parent=self.groupBox)
+        self.whitePlayerEdit.setStyleSheet("\n"
+"          QLineEdit {\n"
+"            padding: 6px;\n"
+"            border: 1px solid #d6d6d6;\n"
+"            border-radius: 3px;\n"
+"            background-color:rgb(255, 255, 255);\n"
+"            color:rgb(0, 0, 0);\n"
+"          }\n"
+"          QLineEdit::placeholder {\n"
+"            color: #95a5a6;\n"
+"          }\n"
+"         ")
         self.whitePlayerEdit.setObjectName("whitePlayerEdit")
         self.formLayout.setWidget(3, QtWidgets.QFormLayout.ItemRole.FieldRole, self.whitePlayerEdit)
         self.label_3 = QtWidgets.QLabel(parent=self.groupBox)
-        self.label_3.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.label_3.setStyleSheet("color: #34495e;")
         self.label_3.setObjectName("label_3")
         self.formLayout.setWidget(4, QtWidgets.QFormLayout.ItemRole.LabelRole, self.label_3)
         self.blackPlayerEdit = QtWidgets.QLineEdit(parent=self.groupBox)
+        self.blackPlayerEdit.setStyleSheet("\n"
+"          QLineEdit {\n"
+"            padding: 6px;\n"
+"            border: 1px solid #d6d6d6;\n"
+"            border-radius: 3px;\n"
+"            background-color:rgb(255, 255, 255);\n"
+"            color:rgb(0, 0, 0);\n"
+"          }\n"
+"          QLineEdit::placeholder {\n"
+"            color: #95a5a6;\n"
+"          }\n"
+"         ")
         self.blackPlayerEdit.setObjectName("blackPlayerEdit")
         self.formLayout.setWidget(4, QtWidgets.QFormLayout.ItemRole.FieldRole, self.blackPlayerEdit)
         self.label_6 = QtWidgets.QLabel(parent=self.groupBox)
-        self.label_6.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.label_6.setStyleSheet("color: #34495e;")
         self.label_6.setObjectName("label_6")
         self.formLayout.setWidget(5, QtWidgets.QFormLayout.ItemRole.LabelRole, self.label_6)
         self.cameraComboBox = QtWidgets.QComboBox(parent=self.groupBox)
+        self.cameraComboBox.setStyleSheet("QComboBox {\n"
+"    padding: 6px;\n"
+"    border: 1px solid #d6d6d6;\n"
+"    border-radius: 3px;\n"
+"}")
         self.cameraComboBox.setObjectName("cameraComboBox")
         self.formLayout.setWidget(5, QtWidgets.QFormLayout.ItemRole.FieldRole, self.cameraComboBox)
         self.verticalLayout.addWidget(self.groupBox)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setSpacing(0)
         self.horizontalLayout.setObjectName("horizontalLayout")
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.startButton = QtWidgets.QPushButton(parent=newGame)
-        self.startButton.setMinimumSize(QtCore.QSize(100, 30))
+        self.startButton.setMinimumSize(QtCore.QSize(120, 40))
+        self.startButton.setStyleSheet("QPushButton {\n"
+"    background-color: #27ae60;\n"
+"    color: white;\n"
+"    border-radius: 4px;\n"
+"    padding: 8px 16px;\n"
+"    font-weight: bold;\n"
+"    font-size: 12pt;\n"
+"}\n"
+"QPushButton:hover {\n"
+"    background-color: #2ecc71;\n"
+"}\n"
+"QPushButton:disabled {\n"
+"    background-color: #95a5a6;\n"
+"}")
         self.startButton.setObjectName("startButton")
         self.horizontalLayout.addWidget(self.startButton)
         spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
@@ -96,5 +194,4 @@ class Ui_newGame(object):
         self.label_3.setText(_translate("newGame", "Black Player:"))
         self.blackPlayerEdit.setPlaceholderText(_translate("newGame", "Enter black player name"))
         self.label_6.setText(_translate("newGame", "Camera:"))
-        self.cameraComboBox.setProperty("placeholderText", _translate("newGame", "Select camera"))
         self.startButton.setText(_translate("newGame", "Start Game"))

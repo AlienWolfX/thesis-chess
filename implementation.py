@@ -33,8 +33,8 @@ WIDTH = 800
 HEIGHT = 800
 
 CONFIDENCE_THRESHOLD = 0.40
-BUFFER_SIZE = 8
-CONSENSUS_THRESHOLD = 0.4
+BUFFER_SIZE = 12  # Try increasing from 8 to 12 or more
+CONSENSUS_THRESHOLD = 0.5  # Try increasing from 0.4 to 0.5
 SHOW_LIVE_WINDOW = True 
 ENABLE_RESOURCE_MONITORING = False
 gameName = datetime.now().strftime("%Y%m%d_%H%M")
@@ -58,7 +58,6 @@ class_id_mapping = {
     'White-Rook': 'R',
 }
 
-# Add these globals at the top (or manage as class members if you refactor)
 last_known_positions = {}
 missing_counter = {}
 MISSING_TOLERANCE = 6  # Number of frames to tolerate missing detection
@@ -411,20 +410,16 @@ def track_pieces(results):
         if square in detected_positions:
             missing_counter[square] = 0
         else:
-            # If previously known, increment missing counter
             if square in last_known_positions:
                 missing_counter[square] = missing_counter.get(square, 0) + 1
                 if missing_counter[square] <= MISSING_TOLERANCE:
-                    # Use last known piece if within tolerance
                     updated_positions[square] = last_known_positions[square]
                 else:
-                    # Remove after tolerance exceeded
                     if square in updated_positions:
                         del updated_positions[square]
             else:
-                missing_counter[square] = 0  # Not seen before
+                missing_counter[square] = 0
 
-    # Update last known positions
     last_known_positions = updated_positions.copy()
     return updated_positions
 

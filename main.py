@@ -2,26 +2,50 @@
 GUI for the project.
 """
 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QDialog, QFileDialog, QListWidgetItem, QMessageBox
+from PyQt6.QtWidgets import (
+    QApplication, QMainWindow, QDialog, QFileDialog,
+    QListWidgetItem, QMessageBox
+)
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6 import QtGui
+
 from forms.mainWindow import Ui_MainWindow
 from forms.newGame import Ui_newGame
 from forms.viewHistory import Ui_viewHistory
 from forms.chessGame import Ui_ChessGameWindow
 from forms.about import Ui_about
-import cv2 as cv
-import chess
+
 import os
-import pandas as pd
-from utils.view_history_utils import render_chessboard, load_pgn_moves, load_csv_moves
-from utils.validation_utils import validate_alphanumeric, validate_alphanumeric_with_spaces, validate_numeric
-import threading
-import numpy as np
 import time
-from datetime import datetime
-import os
-import io
+import threading
+import webbrowser
+import torch
+import cv2
+import chess
+import chess.svg
+
+from utils.view_history_utils import render_chessboard, load_pgn_moves
+from utils.validation_utils import (
+    validate_alphanumeric,
+    validate_alphanumeric_with_spaces,
+    validate_numeric
+)
+
+from implementation import (
+    ensure_directories,
+    PGNRecorder,
+    ChessStateBuffer,
+    ChessDisplay,
+    BUFFER_SIZE,
+    CONSENSUS_THRESHOLD,
+    model,
+    track_pieces,
+    calibrate_board,
+    is_reachable_state,
+    save_move_to_csv_and_pgn,
+    frame_skip
+)
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -30,7 +54,12 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.ui.newGame.clicked.connect(self.newGame)
         self.ui.viewHistory.clicked.connect(self.viewHistory)
-        self.ui.menuHelp.triggered.connect(self.menuHelp)
+
+
+        self.ui.actionNew_Game.triggered.connect(self.newGame)
+        self.ui.actionOpen_CSV.triggered.connect(self.viewHistory)
+        self.ui.actionAbout.triggered.connect(self.showAbout)
+        self.ui.actionReport_Issue.triggered.connect(self.reportIssue)
 
     def newGame(self):
         self.newGameDialog = NewGame(self)
@@ -54,6 +83,16 @@ class MainWindow(QMainWindow):
     def menuHelp(self):
         self.aboutDialog = About(self)
         self.aboutDialog.exec()
+        
+    def showAbout(self):
+        """Show the About dialog"""
+        self.aboutDialog = About(self)
+        self.aboutDialog.exec()
+        
+    def reportIssue(self):
+        """Open GitHub issues page in default browser"""
+        issue_url = "https://github.com/AlienWolfX/thesis-chess/issues"
+        webbrowser.open(issue_url)
 
 class ChessGameWindow(QMainWindow):
     moveMade = pyqtSignal(str, str)  # (color, move)
@@ -136,13 +175,6 @@ class ChessGameWindow(QMainWindow):
     
     def initChessImplementation(self):
         """Initialize the chess tracking implementation."""
-        from implementation import ensure_directories, PGNRecorder, ChessStateBuffer
-        from implementation import ChessDisplay, reset_calibration, BUFFER_SIZE, CONSENSUS_THRESHOLD
-        import cv2
-        import threading
-        from datetime import datetime
-        import os
-        
         # Ensure required directories exist
         ensure_directories()
         
@@ -187,14 +219,6 @@ class ChessGameWindow(QMainWindow):
     
     def runChessTracking(self):
         """Run the chess tracking implementation in a separate thread."""
-        from implementation import model, track_pieces, calibrate_board, is_reachable_state
-        from implementation import save_move_to_csv_and_pgn, CONFIDENCE_THRESHOLD, frame_skip
-        import torch
-        import numpy as np
-        import cv2  # Add explicit cv2 import here
-        from PyQt6.QtCore import QBuffer, QIODevice, QByteArray
-        from PyQt6.QtGui import QImage
-        import time
         
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         frame_count = 0
@@ -249,14 +273,6 @@ class ChessGameWindow(QMainWindow):
     
     def updateChessboardDisplay(self, board_state):
         """Update the chessboard display using the implementation ChessDisplay."""
-        # Use implementation's ChessDisplay for SVG rendering
-        # This guarantees visual consistency with the implementation module
-        board_image = self.chess_display.update(board_state)
-        
-        # Convert OpenCV image to SVG via python-chess for consistent styling
-        import chess
-        import chess.svg
-        
         # Create chess board from state
         board = chess.Board()
         board.clear()
@@ -344,14 +360,14 @@ class NewGame(QDialog):
         
         # Test cameras from index 0 to 99
         for i in range(10):
-            cap = cv.VideoCapture(i, cv.CAP_DSHOW)  # Use DirectShow on Windows
+            cap = cv2.VideoCapture(i, cv2.CAP_DSHOW)  # Use DirectShow on Windows
             if cap.isOpened():
                 # Get camera info
                 ret, frame = cap.read()
                 if ret:
                     # Get camera resolution
-                    width = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
-                    height = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
+                    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                     camera_text = f"Camera {i} ({width}x{height})"
                 else:
                     camera_text = f"Camera {i}"
