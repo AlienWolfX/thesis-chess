@@ -55,11 +55,59 @@ class MainWindow(QMainWindow):
         self.ui.newGame.clicked.connect(self.newGame)
         self.ui.viewHistory.clicked.connect(self.viewHistory)
 
-
-        self.ui.actionNew_Game.triggered.connect(self.newGame)
-        self.ui.actionOpen_CSV.triggered.connect(self.viewHistory)
+        # Update the Open PGN action connection
+        self.ui.actionOpen_PGN.triggered.connect(self.openPGN)
         self.ui.actionAbout.triggered.connect(self.showAbout)
         self.ui.actionReport_Issue.triggered.connect(self.reportIssue)
+
+    # Add new openPGN method
+    def openPGN(self):
+        """Open PGN file and display in ViewHistory"""
+        try:
+            fname, _ = QFileDialog.getOpenFileName(
+                self,
+                "Open PGN File",
+                os.path.expanduser("~"),
+                "Chess Games (*.pgn)"
+            )
+            if fname:
+                # Create matches folder if it doesn't exist
+                matches_folder = os.path.join(os.getcwd(), "matches")
+                os.makedirs(matches_folder, exist_ok=True)
+                
+                file_name = os.path.basename(fname)
+                match_path = os.path.join(matches_folder, file_name)
+                
+                try:
+                    # Try to copy the file with error handling
+                    if fname != match_path:
+                        with open(fname, 'rb') as src, open(match_path, 'wb') as dst:
+                            dst.write(src.read())
+                except PermissionError:
+                    # If copy fails, try to read directly from source
+                    QMessageBox.warning(
+                        self,
+                        "Warning",
+                        "Could not copy file to matches folder. Opening directly from source location."
+                    )
+                    match_path = fname
+                
+                # Create and show ViewHistory window
+                self.viewHistoryWindow = ViewHistory(self)
+                self.viewHistoryWindow.show()
+                
+                # Create and select the item in the matches list
+                item = QListWidgetItem(file_name)
+                self.viewHistoryWindow.ui.matchList.addItem(item)
+                self.viewHistoryWindow.ui.matchList.setCurrentItem(item)
+                self.viewHistoryWindow.displayMatch(item)
+                
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Error",
+                f"An error occurred while opening the PGN file:\n{str(e)}"
+            )
 
     def newGame(self):
         self.newGameDialog = NewGame(self)
