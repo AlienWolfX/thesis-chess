@@ -50,14 +50,3 @@ def load_pgn_moves(pgn_path):
             
             return pd.DataFrame(moves_data), game.headers
     return None, None
-
-def load_csv_moves(csv_path):
-    """Load and process moves from CSV file"""
-    moves_df = pd.read_csv(csv_path)
-    headers = {
-        'Event': os.path.splitext(os.path.basename(csv_path))[0],
-        'Date': moves_df.iloc[0]['Timestamp'].split()[0] if len(moves_df) > 0 else '',
-        'White': 'White',
-        'Black': 'Black'
-    }
-    return moves_df, headers

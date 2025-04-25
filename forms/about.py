@@ -12,14 +12,20 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_about(object):
     def setupUi(self, about):
         about.setObjectName("about")
-        about.resize(500, 382)
-        about.setMinimumSize(QtCore.QSize(400, 250))
+        about.resize(561, 460)
+        about.setMinimumSize(QtCore.QSize(450, 300))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("ui\\../img/app.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        about.setWindowIcon(icon)
+        about.setStyleSheet("QDialog { background-color: #f8f9fa; font-family: \'Segoe UI\', Arial, sans-serif; }")
         self.verticalLayout = QtWidgets.QVBoxLayout(about)
+        self.verticalLayout.setContentsMargins(20, 20, 20, 20)
+        self.verticalLayout.setSpacing(15)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.logoLayout = QtWidgets.QHBoxLayout()
+        self.logoLayout.setObjectName("logoLayout")
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
-        self.horizontalLayout.addItem(spacerItem)
+        self.logoLayout.addItem(spacerItem)
         self.logo = QtWidgets.QLabel(parent=about)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -28,45 +34,46 @@ class Ui_about(object):
         self.logo.setSizePolicy(sizePolicy)
         self.logo.setMinimumSize(QtCore.QSize(128, 128))
         self.logo.setMaximumSize(QtCore.QSize(128, 128))
-        self.logo.setText("")
+        self.logo.setStyleSheet("padding: 10px;")
         self.logo.setPixmap(QtGui.QPixmap("ui\\../img/app.ico"))
         self.logo.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.logo.setObjectName("logo")
-        self.horizontalLayout.addWidget(self.logo)
+        self.logoLayout.addWidget(self.logo)
         spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
-        self.horizontalLayout.addItem(spacerItem1)
-        self.verticalLayout.addLayout(self.horizontalLayout)
+        self.logoLayout.addItem(spacerItem1)
+        self.verticalLayout.addLayout(self.logoLayout)
         self.label_2 = QtWidgets.QLabel(parent=about)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.label_2.sizePolicy().hasHeightForWidth())
         self.label_2.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.label_2.setFont(font)
         self.label_2.setTextFormat(QtCore.Qt.TextFormat.RichText)
         self.label_2.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.label_2.setWordWrap(True)
         self.label_2.setObjectName("label_2")
         self.verticalLayout.addWidget(self.label_2)
-        spacerItem2 = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding)
-        self.verticalLayout.addItem(spacerItem2)
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_2.setSpacing(0)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
-        self.horizontalLayout_2.addItem(spacerItem3)
+        spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem2)
         self.okButton = QtWidgets.QPushButton(parent=about)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.okButton.sizePolicy().hasHeightForWidth())
-        self.okButton.setSizePolicy(sizePolicy)
-        self.okButton.setMinimumSize(QtCore.QSize(100, 30))
+        self.okButton.setMinimumSize(QtCore.QSize(120, 35))
+        self.okButton.setStyleSheet("QPushButton {\n"
+"    background-color: #3498db;\n"
+"    color: white;\n"
+"    border-radius: 4px;\n"
+"    padding: 8px 16px;\n"
+"    font-weight: bold;\n"
+"}\n"
+"QPushButton:hover {\n"
+"    background-color: #2980b9;\n"
+"}")
         self.okButton.setObjectName("okButton")
         self.horizontalLayout_2.addWidget(self.okButton)
-        spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
-        self.horizontalLayout_2.addItem(spacerItem4)
+        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem3)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
 
         self.retranslateUi(about)
@@ -75,10 +82,5 @@ class Ui_about(object):
     def retranslateUi(self, about):
         _translate = QtCore.QCoreApplication.translate
         about.setWindowTitle(_translate("about", "About RookEye.ph"))
-        self.label_2.setText(_translate("about", "<html><head/><body>\n"
-"<p align=\"center\"><span style=\" font-size:12pt; font-weight:600;\">RookEye.ph</span></p>\n"
-"<p align=\"center\">Version 1.0</p>\n"
-"<p align=\"center\">A computer vision project dedicated to recording chess moves.</p>\n"
-"<p align=\"center\">© 2023 RookEye Team</p>\n"
-"</body></html>"))
-        self.okButton.setText(_translate("about", "OK"))
+        self.label_2.setText(_translate("about", "<html><head/><body><p align=\"center\"><span style=\" font-size:24pt; font-weight:600; color:#2c3e50;\">RookEye.ph</span></p><p align=\"center\"><span style=\" font-size:12pt; color:#7f8c8d;\">Version 1.0.0</span></p><p align=\"center\"><span style=\" font-size:11pt; color:#34495e;\">An advanced computer vision system for chess move tracking and analysis</span></p><p align=\"center\"><br/></p><p align=\"center\">© 2025 Allen Cruiz</p></body></html>"))
+        self.okButton.setText(_translate("about", "Close"))

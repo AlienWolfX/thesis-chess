@@ -17,42 +17,98 @@ class Ui_MainWindow(object):
         icon.addPixmap(QtGui.QPixmap("ui\\../img/app.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         MainWindow.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
+        self.centralwidget.setStyleSheet("background-color: #f5f5f5;")
         self.centralwidget.setObjectName("centralwidget")
-        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.centralwidget)
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.mainLayout = QtWidgets.QVBoxLayout(self.centralwidget)
+        self.mainLayout.setSpacing(20)
+        self.mainLayout.setObjectName("mainLayout")
         self.appName = QtWidgets.QLabel(parent=self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.appName.sizePolicy().hasHeightForWidth())
+        self.appName.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Segoe UI Semibold")
         font.setPointSize(36)
         font.setBold(True)
         font.setWeight(75)
         self.appName.setFont(font)
+        self.appName.setStyleSheet("color: #2c3e50; padding: 30px;")
         self.appName.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.appName.setObjectName("appName")
-        self.verticalLayout_2.addWidget(self.appName)
-        self.verticalLayout = QtWidgets.QVBoxLayout()
-        self.verticalLayout.setObjectName("verticalLayout")
+        self.mainLayout.addWidget(self.appName)
+        self.buttonLayout = QtWidgets.QVBoxLayout()
+        self.buttonLayout.setContentsMargins(50, 50, 50, 50)
+        self.buttonLayout.setSpacing(15)
+        self.buttonLayout.setObjectName("buttonLayout")
         self.newGame = QtWidgets.QPushButton(parent=self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.newGame.sizePolicy().hasHeightForWidth())
-        self.newGame.setSizePolicy(sizePolicy)
-        self.newGame.setMinimumSize(QtCore.QSize(0, 24))
+        self.newGame.setMinimumSize(QtCore.QSize(0, 50))
+        font = QtGui.QFont()
+        font.setFamily("Segoe UI")
+        font.setPointSize(14)
+        font.setBold(True)
+        font.setWeight(60)
+        self.newGame.setFont(font)
+        self.newGame.setStyleSheet("\n"
+"                    QPushButton {\n"
+"                      background-color: #3498db;\n"
+"                      color: white;\n"
+"                      border-radius: 5px;\n"
+"                      padding: 10px;\n"
+"                    }\n"
+"                    QPushButton:hover {\n"
+"                      background-color: #2980b9;\n"
+"                    }\n"
+"                  ")
         self.newGame.setObjectName("newGame")
-        self.verticalLayout.addWidget(self.newGame)
+        self.buttonLayout.addWidget(self.newGame)
         self.viewHistory = QtWidgets.QPushButton(parent=self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.viewHistory.sizePolicy().hasHeightForWidth())
-        self.viewHistory.setSizePolicy(sizePolicy)
+        self.viewHistory.setMinimumSize(QtCore.QSize(0, 50))
+        font = QtGui.QFont()
+        font.setFamily("Segoe UI")
+        font.setPointSize(14)
+        font.setBold(True)
+        font.setWeight(60)
+        self.viewHistory.setFont(font)
+        self.viewHistory.setStyleSheet("\n"
+"                    QPushButton {\n"
+"                      background-color: #2ecc71;\n"
+"                      color: white;\n"
+"                      border-radius: 5px;\n"
+"                      padding: 10px;\n"
+"                    }\n"
+"                    QPushButton:hover {\n"
+"                      background-color: #27ae60;\n"
+"                    }\n"
+"                  ")
         self.viewHistory.setObjectName("viewHistory")
-        self.verticalLayout.addWidget(self.viewHistory)
-        self.verticalLayout_2.addLayout(self.verticalLayout)
+        self.buttonLayout.addWidget(self.viewHistory)
+        self.mainLayout.addLayout(self.buttonLayout)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 928, 21))
+        self.menubar.setStyleSheet("\n"
+"          QMenuBar {\n"
+"            background-color: #34495e;\n"
+"            color: white;\n"
+"          }\n"
+"          QMenuBar::item {\n"
+"            background-color: transparent;\n"
+"            color: white;\n"
+"          }\n"
+"          QMenuBar::item:selected {\n"
+"            background-color: #2c3e50;\n"
+"          }\n"
+"          QMenu {\n"
+"            background-color: #34495e;\n"
+"            color: white;\n"
+"            border: 1px solid #2c3e50;\n"
+"          }\n"
+"          QMenu::item:selected {\n"
+"            background-color: #2c3e50;\n"
+"          }\n"
+"        ")
         self.menubar.setObjectName("menubar")
         self.menuMenu = QtWidgets.QMenu(parent=self.menubar)
         self.menuMenu.setObjectName("menuMenu")
@@ -60,21 +116,36 @@ class Ui_MainWindow(object):
         self.menuHelp.setObjectName("menuHelp")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
+        self.statusbar.setStyleSheet("background-color: #ecf0f1; color: #2c3e50;")
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
-        self.actionReport_Issue = QtGui.QAction(parent=MainWindow)
-        self.actionReport_Issue.setObjectName("actionReport_Issue")
-        self.actionAbout = QtGui.QAction(parent=MainWindow)
-        self.actionAbout.setObjectName("actionAbout")
         self.actionNew_Game = QtGui.QAction(parent=MainWindow)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap("ui\\../../../../../Downloads/Compressed/fugue-icons-3.5.6-src/icons/new.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        self.actionNew_Game.setIcon(icon1)
         self.actionNew_Game.setObjectName("actionNew_Game")
         self.actionExport_to_CSV = QtGui.QAction(parent=MainWindow)
         self.actionExport_to_CSV.setObjectName("actionExport_to_CSV")
         self.actionOpen_CSV = QtGui.QAction(parent=MainWindow)
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap("ui\\../../../../../Downloads/Compressed/fugue-icons-3.5.6-src/icons/blue-folder-open-feed.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        self.actionOpen_CSV.setIcon(icon2)
         self.actionOpen_CSV.setObjectName("actionOpen_CSV")
+        self.actionAbout = QtGui.QAction(parent=MainWindow)
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap("ui\\../../../../../Downloads/Compressed/fugue-icons-3.5.6-src/icons/question-button.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        self.actionAbout.setIcon(icon3)
+        self.actionAbout.setObjectName("actionAbout")
+        self.actionReport_Issue = QtGui.QAction(parent=MainWindow)
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap("ui\\../../../../../Downloads/Compressed/fugue-icons-3.5.6-src/icons/report-image.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        self.actionReport_Issue.setIcon(icon4)
+        self.actionReport_Issue.setObjectName("actionReport_Issue")
         self.menuMenu.addAction(self.actionNew_Game)
         self.menuMenu.addSeparator()
+        self.menuMenu.addAction(self.actionOpen_CSV)
         self.menuHelp.addAction(self.actionAbout)
+        self.menuHelp.addAction(self.actionReport_Issue)
         self.menubar.addAction(self.menuMenu.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
 
@@ -89,8 +160,12 @@ class Ui_MainWindow(object):
         self.viewHistory.setText(_translate("MainWindow", "View History"))
         self.menuMenu.setTitle(_translate("MainWindow", "File"))
         self.menuHelp.setTitle(_translate("MainWindow", "Help"))
-        self.actionReport_Issue.setText(_translate("MainWindow", "Report Issue"))
-        self.actionAbout.setText(_translate("MainWindow", "About"))
         self.actionNew_Game.setText(_translate("MainWindow", "New Game"))
+        self.actionNew_Game.setShortcut(_translate("MainWindow", "Ctrl+N"))
         self.actionExport_to_CSV.setText(_translate("MainWindow", "Export to CSV"))
+        self.actionExport_to_CSV.setShortcut(_translate("MainWindow", "Ctrl+E"))
         self.actionOpen_CSV.setText(_translate("MainWindow", "Open CSV"))
+        self.actionOpen_CSV.setShortcut(_translate("MainWindow", "Ctrl+O"))
+        self.actionAbout.setText(_translate("MainWindow", "About"))
+        self.actionAbout.setShortcut(_translate("MainWindow", "F1"))
+        self.actionReport_Issue.setText(_translate("MainWindow", "Report Issue"))
