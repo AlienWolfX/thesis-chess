@@ -17,6 +17,61 @@
    <iconset>
     <normaloff>../img/app.ico</normaloff>../img/app.ico</iconset>
   </property>
+  <property name="styleSheet">
+   <string notr="true">    QMainWindow {
+      background-color: #f5f5f5;
+    }
+    QGroupBox {
+      border: 1px solid #34495e;
+      border-radius: 5px;
+      margin-top: 10px;
+      color: #2c3e50;
+      font-weight: bold;
+    }
+    QGroupBox::title {
+      subcontrol-origin: margin;
+      left: 10px;
+      padding: 0 3px;
+    }
+    QLabel {
+      color: #2c3e50;
+    }
+    QLineEdit {
+      padding: 6px;
+      background-color: #34495e;
+      color: white;
+      border: 1px solid #2c3e50;
+      border-radius: 3px;
+    }
+    QListView {
+      background-color: #34495e;
+      color: white;
+      border: 1px solid #2c3e50;
+      border-radius: 3px;
+      padding: 2px;
+    }
+    QListView::item {
+      padding: 4px;
+      color: white;
+    }
+    QListView::item:selected {
+      background-color: #2c3e50;
+    }
+    QListView::item:hover {
+      background-color: #2c3e50;
+    }
+    QPushButton {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    QPushButton:hover {
+      background-color: #c0392b;
+    }</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="outerVerticalLayout">
     <item>
