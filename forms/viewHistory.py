@@ -54,10 +54,11 @@ class Ui_viewHistory(object):
 "       }\n"
 "       QListWidget::item:selected {\n"
 "         background-color: #3498db;\n"
-"         color: #ffffff;\n"
+"         color: #000000;\n"
 "       }\n"
 "       QListWidget::item:hover {\n"
 "         background-color: #ecf0f1;\n"
+"         color: #000000;\n"
 "       }\n"
 "      ")
         self.groupBox.setObjectName("groupBox")
@@ -142,10 +143,11 @@ class Ui_viewHistory(object):
 "       }\n"
 "       QListWidget::item:selected {\n"
 "         background-color: #3498db;\n"
-"         color: #ffffff;\n"
+"         color: #000000;\n"
 "       }\n"
 "       QListWidget::item:hover {\n"
 "         background-color: #ecf0f1;\n"
+"         color: #000000;\n"
 "       }\n"
 "      ")
         self.groupBox_2.setObjectName("groupBox_2")

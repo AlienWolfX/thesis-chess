@@ -81,10 +81,11 @@
        }
        QListWidget::item:selected {
          background-color: #3498db;
-         color: #ffffff;
+         color: #000000;
        }
        QListWidget::item:hover {
          background-color: #ecf0f1;
+         color: #000000;
        }
       </string>
      </property>
@@ -212,10 +213,11 @@
        }
        QListWidget::item:selected {
          background-color: #3498db;
-         color: #ffffff;
+         color: #000000;
        }
        QListWidget::item:hover {
          background-color: #ecf0f1;
+         color: #000000;
        }
       </string>
      </property>
