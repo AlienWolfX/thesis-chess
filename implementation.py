@@ -60,7 +60,7 @@ class_id_mapping = {
 
 last_known_positions = {}
 missing_counter = {}
-MISSING_TOLERANCE = 6  # Number of frames to tolerate missing detection
+MISSING_TOLERANCE = 8
 
 def ensure_directories():
     """Ensure required directories exist"""
